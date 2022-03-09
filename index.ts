@@ -108,9 +108,21 @@ const main = async () => {
 
     // console.log(executeResponse)
 
+    // const res = await client.execute(
+    //   "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
+    //   "juno14tu3xs4w58kh90k86nf5sycck6l0x6tr4mkyfuun76aex5tltqrq0lfmrt",
+    //   {
+    //          deposit: {id:"1"}
+    //   },
+    //   "auto","",
+    //   [coin(3, "ujunox")],
+    // )
+
+    // console.log(res)
+    
     // const queryResponse = await client.queryContractSmart(
     //     //"juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
-    //     "juno16u4knekeyqqs45ywxejm4x9v0m6rsy0xp5vlahrc5a0gp7sm78ks87gqw9",
+    //     "juno14tu3xs4w58kh90k86nf5sycck6l0x6tr4mkyfuun76aex5tltqrq0lfmrt",
     //     {
     //       get_lock_box: {id:"1"}
     //     },
