@@ -13,6 +13,7 @@ const JUNO_MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi"
 const JUNO_TESTNET_RPC = "https://rpc.uni.juno.deuslabs.fi"
 
 const MNEMONIC =
+//"olive hamster circle beyond parent lab cup million manual someone kiss acquire ginger layer valley gorilla repair mandate actress organ domain siren fuel else"
 "alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
 // "chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
 //"anger ivory inside rocket reopen long flee jump elite wear negative distance income involve lobster boil panel champion reflect horse dial lion doctor prosper"
@@ -118,6 +119,9 @@ const main = async () => {
   // )
   // console.log(result)
   
+  //Instantiate To-Do List
+  //const response = await client.instantiate("wasm1t9jfuyv8xqas7j7pf4jrt7r4sq7s6epeatkz9y", 1345, {}, "Test List", "auto")
+  //console.log(response)
 
   //Instantiate Lockbox
   // const response = await client.instantiate(
