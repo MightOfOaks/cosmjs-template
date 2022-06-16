@@ -5,7 +5,7 @@ import TransportNodeHid from "@ledgerhq/hw-transport-node-hid"
 
 const walletOptions = {
   hdPaths: [makeCosmoshubPath(0)],
-  prefix: "juno",
+  prefix: "wasm",
 }
 
 export const getSigner = async (mnemonic: string) => {

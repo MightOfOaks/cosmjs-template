@@ -10,19 +10,22 @@ import { coin } from "@cosmjs/amino"
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
 const JUNO_MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi"
-const JUNO_TESTNET_RPC = "https://rpc.uni.juno.deuslabs.fi"
+const JUNO_TESTNET_RPC = "https://rpc.cliffnet.cosmwasm.com:443"
 
 const MNEMONIC =
+"draft weird switch quality approve steel voice catch place apology million solar winter crunch expire accident rare enhance return genius praise peasant dress maid"
 //"olive hamster circle beyond parent lab cup million manual someone kiss acquire ginger layer valley gorilla repair mandate actress organ domain siren fuel else"
-"alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
+//"alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
 // "chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
 //"anger ivory inside rocket reopen long flee jump elite wear negative distance income involve lobster boil panel champion reflect horse dial lion doctor prosper"
 
 const CONTRACT_ADDRESS =
   //"juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74"
   //"juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5"
+  //"wasm1t9jfuyv8xqas7j7pf4jrt7r4sq7s6epeatkz9y"
   //"juno16u4knekeyqqs45ywxejm4x9v0m6rsy0xp5vlahrc5a0gp7sm78ks87gqw9"
-  "juno1ke559k9wh8akdrtf7nyv465c047nt6hpcg0ntfke6c4s2s74kses6recpp"
+  //"juno1ke559k9wh8akdrtf7nyv465c047nt6hpcg0ntfke6c4s2s74kses6recpp"
+  "wasm12xmuhsl5lc2qmrdk4fhythgt733aswm9q5wppl2gq33l4nytdx0q7vnvfl"
 
 let signer: DirectSecp256k1HdWallet | LedgerSigner
 let client: SigningCosmWasmClient
@@ -41,8 +44,8 @@ const main = async () => {
     IS_TESTNET ? JUNO_TESTNET_RPC : JUNO_MAINNET_RPC,
     signer,
     {
-      prefix: "juno",
-      gasPrice: GasPrice.fromString("0.0025ujunox"),
+      prefix: "wasm",
+      gasPrice: GasPrice.fromString("0.025upebble"),
     }
   )
 
@@ -120,8 +123,41 @@ const main = async () => {
   // console.log(result)
   
   //Instantiate To-Do List
-  //const response = await client.instantiate("wasm1t9jfuyv8xqas7j7pf4jrt7r4sq7s6epeatkz9y", 1345, {}, "Test List", "auto")
-  //console.log(response)
+  // const response = await client.instantiate("wasm1t9jfuyv8xqas7j7pf4jrt7r4sq7s6epeatkz9y", 1345, {}, "Test List", "auto")
+  // console.log(response)
+
+  // const result = await client.queryContractSmart("wasm12xmuhsl5lc2qmrdk4fhythgt733aswm9q5wppl2gq33l4nytdx0q7vnvfl", 
+  //  { query_list: {} }
+  //  )
+  //  console.log(result)
+
+  //  const executeResponse = await client.execute(
+  //       "wasm1t9jfuyv8xqas7j7pf4jrt7r4sq7s6epeatkz9y",
+  //       "wasm1qz8rlmx0ahasm9qnwlhh52gujksttdweye8haq2ltr55rx6tl3ys2y7shm",
+  //       {
+  //         update_entry: {
+  //           id: "2",
+  //           description: "Updated entry.",
+  //           priority: "High",
+  //           status: "InProgress"
+  //         }
+  //       },
+  //       "auto",
+  //     )
+  //     console.log(executeResponse)
+
+      // const executeResponse = await client.execute(
+      //   "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+      //   "wasm1qz8rlmx0ahasm9qnwlhh52gujksttdweye8haq2ltr55rx6tl3ys2y7shm",
+      //   {
+      //     new_entry: {
+      //       description: "Yet another entry.",
+      //       priority: "High"
+      //     }
+      //   },
+      //   "auto",
+      // )
+      // console.log(executeResponse)
 
   //Instantiate Lockbox
   // const response = await client.instantiate(
