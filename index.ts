@@ -3,22 +3,24 @@ import { GasPrice } from "@cosmjs/stargate"
 import { DirectSecp256k1HdWallet, EncodeObject } from "@cosmjs/proto-signing"
 import { LedgerSigner } from "@cosmjs/ledger-amino"
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx"
-import { toUtf8 } from "@cosmjs/encoding"
+import { fromHex, toBase64, toUtf8 } from "@cosmjs/encoding"
 import { getSigner, getLedgerSigner } from "./wallet"
-import { coin } from "@cosmjs/amino"
+import { coin, makeCosmoshubPath } from "@cosmjs/amino"
 
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
 const JUNO_MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi"
 const JUNO_TESTNET_RPC = "https://rpc.uni.juno.deuslabs.fi"
 
-const MNEMONIC =
+const MNEMONIC = 
+//stargaze test "wait boring drastic roast ranch close prefer sibling total across faint empty"
 //"olive hamster circle beyond parent lab cup million manual someone kiss acquire ginger layer valley gorilla repair mandate actress organ domain siren fuel else"
 "alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
 // "chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
 //"anger ivory inside rocket reopen long flee jump elite wear negative distance income involve lobster boil panel champion reflect horse dial lion doctor prosper"
 
-const CONTRACT_ADDRESS =
+const CONTRACT_ADDRESS = 
+  // "stars10t2y7f9m0twpsrz3kvfp55nlgzc86kace2se3uarkv380h3pk6qq5cnvr9"
   //"juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74"
   //"juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5"
   //"juno16u4knekeyqqs45ywxejm4x9v0m6rsy0xp5vlahrc5a0gp7sm78ks87gqw9"
@@ -42,11 +44,25 @@ const main = async () => {
     signer,
     {
       prefix: "juno",
-      gasPrice: GasPrice.fromString("0.0025ujunox"),
+      gasPrice: GasPrice.fromString("0.025ujunox"),
     }
   )
+console.log((await signer.getAccounts())[0].address)
+  //console.log(await client.getBlock())
+  //console.log(await signer.getAccounts())
+  // console.log(await client.getBlock(1000000))
+  // const byteArray = [51, 0, 112, 117,  98, 108, 105, 115, 104, 101, 100,
+  //   0, 119,  97, 108, 108, 101, 116, 0,  97, 103, 111,
+  // 114, 105,  99,  49,  50, 102, 108, 99, 106, 109, 113,
+  //  55,  48,  48, 102, 117, 107,  48,  52,  50, 100, 103,
+  // 100, 119,  50,  99,  97, 101, 116, 107,  99, 106, 106,
+  //  55, 118,  55, 119,  52, 107, 119,  55, 104]
 
-  //Instantiate CW20 contract
+  // const bytesString = String.fromCharCode(...byteArray)
+
+  // console.log(bytesString)
+
+  // Instantiate CW20 contract
   
   // const msg = {
   //   name: 'Test Coin',
@@ -75,10 +91,10 @@ const main = async () => {
   
 
   // const label = 'Test Coin'
-
+  // let senderAddress = (await signer.getAccounts())[0].address
   // const response = await client.instantiate(
-  //   "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
-  //   5,
+  //  senderAddress,
+  //   15,
   //   msg,
   //   label,
   //   "auto"
@@ -86,21 +102,81 @@ const main = async () => {
 
   // console.log(response)
 
-  //Query Balance
+  //RAW QUERY
+  // console.log(Buffer.from("balance").toString("hex"))
+  // let res = await client.queryContractRaw(
+  //   "juno1fa7sxluzg27unysrgnmckpnjk8xpy70fe0kv7cf423fwu4ftcmxs3d4pyl",
+  //   toUtf8(
+  //     Buffer.from(
+  //       "000B" +
+  //         Buffer.from("permissions").toString("hex") +
+  //         Buffer.from("juno14wu56uyj9hw68x3mltxd2jl0298v4stg3qfcjt").toString(
+  //           "hex"
+  //         ),
+  //       "hex"
+  //     ).toString()
+  //   )
+  // )
+  // console.log(res)
+
+  // let res = await client.queryContractRaw(
+  //   "juno19j78q9l3zqm6c4mavyv0j055xcm48ust80y5lrznax4jt43rpkmsz8zl7s",
+  //   toUtf8(
+  //     Buffer.from(
+  //       // "000C" +
+  //       Buffer.from("config").toString("hex"),
+  //       // Buffer.from("mint_module").toString("hex"),
+  //       "hex"
+  //     ).toString()
+  //   )
+  // )
+  // console.log(res)
+  
+  // Query Balance
 
   // const balance = async (address: string): Promise<string> => {
-  //   const result = await client.queryContractSmart("juno1z4chusdz400jydm7vcpurkpxrm0hfkj8pessnuyvpjn3p37s34yq8wxsyu", {
-  //     balance: { address },
+  //   const result = await client.queryContractSmart("juno1n0cp0gu4scqk6dujldj4c7gvhsrvdvn4zwj2tnfjvc2kt2c9z2lq9sw2eg", {
+  //       balance: { address },
   //   })
   //   return result.balance
   // }
   // console.log(await balance("juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74"))
-
   
-  // const queryClient = await CosmWasmClient.connect("https://rpc.double-double-1.stargaze-apis.com/")
+  // const utf8Encode = new TextEncoder();
+  // let rawMessage = Buffer.from("0006636f6e666967","hex").toString();
+  // console.log(rawMessage)
+  // const res = await client.queryContractRaw("juno1hdnkxjstq04l2jfuterh8nmgzxm9ygythent6f2vnr6l5u8ph55sjhscl6", utf8Encode.encode(rawMessage));
+  // console.log(res)  
+  
+// const msg: EncodeObject = {
+//     typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+//     value: {
+//         from_address: "myAddress",
+//         to_address: "yourAddress",
+//         amount: [
+//             {
+//                 denom: "ujunox",
+//                 amount: "1000000",
+//             },
+//         ],
+//     },
+// };
+
+// const defaultFee = {
+//   amount: [],
+//   gas: "200000",
+// };
+
+// let tx = client.sign("juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74", [msg], defaultFee, "" )
+// console.log((await tx).signatures)
+
+  //const queryClient = await CosmWasmClient.connect("https://rpc.double-double-1.stargaze-apis.com/")
   // const balance= await queryClient.getBalance("stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz","ustars")      
   // console.log(balance)
-    
+
+  // const queryClient = await CosmWasmClient.connect("https://rpc.uni.juno.deuslabs.fi")
+  // const tokenInfo= await queryClient.queryContractSmart("juno1kydyh8xeraz280e6pprvtmtyuetjxdn7kyfdypk2gr4a24czk5nqp0njap", {token_info:{ }})      
+  // console.log(tokenInfo)
 
 
   //console.log(await client.getCodeDetails(733))
@@ -128,9 +204,9 @@ const main = async () => {
   //     "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
   //     732,
   //     {},
-  //     "Test Lockbox",
   //     "auto"
   //   )
+  //     "Test Lockbox",
   //   console.log(response)
 
   //Create Lockbox
@@ -277,13 +353,17 @@ const main = async () => {
   // console.log(res)
 
   // const res = await client.queryContractSmart(
-  //     'juno1hr575ypkccxs978ahtue3a7t5e2cqw8z598ky4007ftzz96kv29s683fw0',
+  //     'juno1n4txsd0494v4g2mqpq7s6wtk57shnut5hhnczcjq4dv774ek50nsyql45q',
   //     {
-  //       get_min_delay: {}
+  //       all_account_maps: {
+  //         stage: 1,
+  //         start_after: "0",
+  //         limit: 10
+         
+  //       }
   //     },
   //   )
-  
-  //   console.log(res) 
+  // console.log(res) 
 
   // const executeResponse = await client.execute(
   //       "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
