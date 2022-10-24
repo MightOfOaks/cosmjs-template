@@ -10,7 +10,7 @@ import { coin, makeCosmoshubPath } from "@cosmjs/amino"
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
 const JUNO_MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi"
-const JUNO_TESTNET_RPC = "https://rpc.uni.juno.deuslabs.fi"
+const JUNO_TESTNET_RPC = "https://rpc.elgafar-1.stargaze-apis.com/"
 
 const MNEMONIC = 
 //stargaze test "wait boring drastic roast ranch close prefer sibling total across faint empty"
@@ -25,7 +25,8 @@ const CONTRACT_ADDRESS =
   //"juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74"
   //"juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5"
   //"juno16u4knekeyqqs45ywxejm4x9v0m6rsy0xp5vlahrc5a0gp7sm78ks87gqw9"
-  "juno1ke559k9wh8akdrtf7nyv465c047nt6hpcg0ntfke6c4s2s74kses6recpp"
+  //"juno1ke559k9wh8akdrtf7nyv465c047nt6hpcg0ntfke6c4s2s74kses6recpp"
+  "stars134d6rrhpwjtz356t42553tlc6gpqcm82nzv0xc5klshm2x4p6vxs95yw3k"
 
 let signer: DirectSecp256k1HdWallet | LedgerSigner
 let client: SigningCosmWasmClient
@@ -44,14 +45,14 @@ const main = async () => {
     IS_TESTNET ? JUNO_TESTNET_RPC : JUNO_MAINNET_RPC,
     signer,
     {
-      prefix: "juno",
-      gasPrice: GasPrice.fromString("0.025ujunox"),
+      prefix: "stars",
+      gasPrice: GasPrice.fromString("0.025ustars"),
     }
   )
   console.log((await signer.getAccounts())[0].address)
   //client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1fvpmck9vtf2ys85zvtud2ss5pr63sh0th3yf32072g7s23emk5vs4u4lve', 1174, {}, 'auto')
-  console.log(await client.getContracts(1268))
-  console.log(await client.getContractCodeHistory("juno143rmxg4khjkxzk56pd3tru6wapenwls20y3shahlc5p9zgddyk8q27n0k4"))
+  // console.log(await client.getContracts(1268))
+  // console.log(await client.getContractCodeHistory("juno143rmxg4khjkxzk56pd3tru6wapenwls20y3shahlc5p9zgddyk8q27n0k4"))
   // console.log(await client.getContract("juno1mfx2wy7g87mv42mnvrqktplggqwqh7phvehk7sfpamgrqvzmln0qkkulak"))
   
   // console.log(await client.getCodeDetails(752))
@@ -352,21 +353,16 @@ const main = async () => {
   // }
   // const encode = (str: string):string => Buffer.from(str, 'binary').toString('base64');
 
-  // const res = await client.execute(
-  //   'juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74',
-  //   'juno1t5xudvdl4qlu30ta9lh4gzqkk47ldpuc7leveutjpulqmq8wufksk0zu4x',
-  //   {
-  //     schedule: {
-  //       data: encode(JSON.stringify(msg)),
-  //       target_address: 'juno154xu4268g2rdtnxjjsfr3wy9t3vx97308rdgau66s0d3amlxp7zq4j78us',
-  //       execution_time: Number(17146744073709551515).toString(),
-  //       executors: ['juno1smz9wdg5v7wywquyy7zn7ujvu54kuumwzw5ss8',"juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74"]
-  //     }
-  //   },
-  //   'auto'
-  // )
+  const res = await client.execute(
+    'stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e',
+    'stars134d6rrhpwjtz356t42553tlc6gpqcm82nzv0xc5klshm2x4p6vxs95yw3k',
+    {
+      freeze_collection_info: {},
+    },
+    'auto'
+  )
 
-  // console.log(res)
+   console.log(res)
 
   // const res = await client.queryContractSmart(
   //     'juno1n4txsd0494v4g2mqpq7s6wtk57shnut5hhnczcjq4dv774ek50nsyql45q',
