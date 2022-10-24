@@ -15,9 +15,10 @@ const JUNO_TESTNET_RPC = "https://rpc.uni.juno.deuslabs.fi"
 const MNEMONIC = 
 //stargaze test "wait boring drastic roast ranch close prefer sibling total across faint empty"
 //"olive hamster circle beyond parent lab cup million manual someone kiss acquire ginger layer valley gorilla repair mandate actress organ domain siren fuel else"
-"alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
-// "chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
+//"alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
+"chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
 //"anger ivory inside rocket reopen long flee jump elite wear negative distance income involve lobster boil panel champion reflect horse dial lion doctor prosper"
+//"track huge holiday father slice combine all canal harbor grunt hub keen badge faint victory achieve forum december quiz topple improve island small logic"
 
 const CONTRACT_ADDRESS = 
   // "stars10t2y7f9m0twpsrz3kvfp55nlgzc86kace2se3uarkv380h3pk6qq5cnvr9"
@@ -47,9 +48,15 @@ const main = async () => {
       gasPrice: GasPrice.fromString("0.025ujunox"),
     }
   )
-console.log((await signer.getAccounts())[0].address)
-  //console.log(await client.getBlock())
-  //console.log(await signer.getAccounts())
+  console.log((await signer.getAccounts())[0].address)
+  //client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1fvpmck9vtf2ys85zvtud2ss5pr63sh0th3yf32072g7s23emk5vs4u4lve', 1174, {}, 'auto')
+  console.log(await client.getContracts(1268))
+  console.log(await client.getContractCodeHistory("juno143rmxg4khjkxzk56pd3tru6wapenwls20y3shahlc5p9zgddyk8q27n0k4"))
+  // console.log(await client.getContract("juno1mfx2wy7g87mv42mnvrqktplggqwqh7phvehk7sfpamgrqvzmln0qkkulak"))
+  
+  // console.log(await client.getCodeDetails(752))
+  // console.log(await client.getBlock())
+  // console.log(await signer.getAccounts())
   // console.log(await client.getBlock(1000000))
   // const byteArray = [51, 0, 112, 117,  98, 108, 105, 115, 104, 101, 100,
   //   0, 119,  97, 108, 108, 101, 116, 0,  97, 103, 111,
@@ -57,10 +64,13 @@ console.log((await signer.getAccounts())[0].address)
   //  55,  48,  48, 102, 117, 107,  48,  52,  50, 100, 103,
   // 100, 119,  50,  99,  97, 101, 116, 107,  99, 106, 106,
   //  55, 118,  55, 119,  52, 107, 119,  55, 104]
-
   // const bytesString = String.fromCharCode(...byteArray)
+  
+  // let byteArray = await client.getCodeDetails(500)
+  // //Convert Uint8Array array to string
+  // var string = new TextDecoder().decode(byteArray.data);
+  // console.log(string)
 
-  // console.log(bytesString)
 
   // Instantiate CW20 contract
   
@@ -151,8 +161,8 @@ console.log((await signer.getAccounts())[0].address)
 // const msg: EncodeObject = {
 //     typeUrl: "/cosmos.bank.v1beta1.MsgSend",
 //     value: {
-//         from_address: "myAddress",
-//         to_address: "yourAddress",
+//         from_address: "anAddress",
+//         to_address: "anotherAddress",
 //         amount: [
 //             {
 //                 denom: "ujunox",
@@ -188,10 +198,16 @@ console.log((await signer.getAccounts())[0].address)
   // });
 
   // console.log(kod)
+  //console.log(await client.getContractCodeHistory("juno1mfx2wy7g87mv42mnvrqktplggqwqh7phvehk7sfpamgrqvzmln0qkkulak"))
+  // Token Info
+  // const result = await client.queryContractSmart("juno1mfx2wy7g87mv42mnvrqktplggqwqh7phvehk7sfpamgrqvzmln0qkkulak", 
+  // { proposal_modules: {} }
+  // )
+  // console.log(result)
 
-  //Token Info
-  // const result = await client.queryContractSmart("juno1ek7vp4wky62zqrmgvwvegak7vxkg63cvyprklmgj9j7y6tg7uw5saw2mnh", 
-  // { token_info: {} }
+  // Token Info
+  // const result = await client.queryContractSmart("juno1x7j0xaf2gru7m8f6lvnyqd8ctl6pwy540dckje3uxm79q5xy4wesgrs29f", 
+  // { is_paused: {stage:1} }
   // )
   // console.log(result)
   
@@ -282,10 +298,10 @@ console.log((await signer.getAccounts())[0].address)
 
     //Reset Lockbox
     // const res = await client.execute(
-    //   "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
-    //   "juno1fdm4d8a5xtluvxrmm0tk3zxnhusf7enhjkk3pplw8f30jzrqzpgqqzs2eq",
+    //   "juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5",
+    //   "juno1x7j0xaf2gru7m8f6lvnyqd8ctl6pwy540dckje3uxm79q5xy4wesgrs29f",
     //   {
-    //     reset: {id: "3"},
+    //     pause: {stage: 1},
     //   },
     //   'auto',
     //   '',
