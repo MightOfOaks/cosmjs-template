@@ -111,19 +111,31 @@ const main = async () => {
   // )
   // console.log(executeResponse)  
 
-  //Query
+  //Query Stream
 
   const result = await client.queryContractSmart(CONTRACT_ADDRESS, {
     stream: { stream_id: 1 },
   })
   
   console.log(result)
+  console.log("Stream Last Updated: ", new Date(parseInt(result.last_updated)/1000000).toLocaleString())
+  console.log("Stream Start Time: ", new Date(parseInt(result.start_time)/1000000).toLocaleString())
+  console.log("Stream End Time: ", new Date(parseInt(result.end_time)/1000000).toLocaleString())
+
+
   
+  //Query Position
+  
+  //wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm
+  //wasm1hnsk554472szj6ex0lpvhsfszdmuc2lnd72ket
+  //wasm18w0lvf7lpmqhsggs0wfcy6snnpzwzhyatv7kzg
+
   // const res = await client.queryContractSmart(CONTRACT_ADDRESS, {
   //   position: { stream_id: 1, owner: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm" },
   // })
 
   // console.log(res)
+  // console.log("Position Last Updated: ", new Date(parseInt(res.last_updated)/1000000).toLocaleString())
 }
 
 main()
