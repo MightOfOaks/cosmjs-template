@@ -76,6 +76,8 @@ const main = async () => {
   
   //Execute
 
+  //Create Stream
+
   //  const executeResponse = await client.execute(
   //       signer_address,
   //       CONTRACT_ADDRESS,
@@ -96,6 +98,8 @@ const main = async () => {
   //       [coin(1000000, "uosmo")]
   //     )
   //     console.log(executeResponse)
+
+  //Subscribe
   
   // const executeResponse = await client.execute(
   //   signer_address,
@@ -109,7 +113,23 @@ const main = async () => {
   //   },
   //   "auto",
   // )
-  // console.log(executeResponse)  
+  // console.log(executeResponse)
+
+  //Withdraw
+  
+  const executeResponse = await client.execute(
+    signer_address,
+    CONTRACT_ADDRESS,
+    {
+      withdraw: {
+        stream_id: 1,
+        cap: null,
+        position_owner: null
+      },
+    },
+    "auto",
+  )
+  console.log(executeResponse) 
 
   //Query Stream
 
@@ -125,7 +145,7 @@ const main = async () => {
 
   
   //Query Position
-  
+
   //wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm
   //wasm1hnsk554472szj6ex0lpvhsfszdmuc2lnd72ket
   //wasm18w0lvf7lpmqhsggs0wfcy6snnpzwzhyatv7kzg
