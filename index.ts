@@ -15,7 +15,11 @@ const MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi"
 const TESTNET_RPC = "https://rpc.streamswap-devnet.omniflix.co:443/"
 
 const MNEMONIC =
+//wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm
 "draft weird switch quality approve steel voice catch place apology million solar winter crunch expire accident rare enhance return genius praise peasant dress maid"
+
+//wasm1hnsk554472szj6ex0lpvhsfszdmuc2lnd72ket
+//"magnet prosper annual put weekend tomato join oil bottom pilot mother silly brush soft uncle drift profit shoe raccoon brand puzzle shock track hockey"
 
 const CONTRACT_ADDRESS =
   "wasm1sr06m8yqg0wzqqyqvzvp5t07dj4nevx9u8qc7j4qa72qu8e3ct8qzuktnp"
@@ -42,10 +46,12 @@ const main = async () => {
     }
   )
 
-  console.log((await signer.getAccounts())[0].address)
-  console.log(await client.getBalance("wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm", "uosmo"))
-
-  //Instantiate SS contract
+  const signer_address = (await signer.getAccounts())[0].address
+  console.log(signer_address)
+  console.log(await client.getBalance(signer_address, "uosmo"))
+  console.log(await client.getBalance(signer_address, "ujuno"))
+  // console.log(await client.getBalance(signer_address, "uatom"))
+  // console.log(await client.getBalance(signer_address, "uflix"))
   
   // const msg = {
   //   min_stream_seconds: "3600",
@@ -53,10 +59,10 @@ const main = async () => {
   //   stream_creation_denom: "uosmo",
   //   stream_creation_fee: "1000000",
   //   fee_collector: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-  //   }
+  // }
 
   // const response = await client.instantiate(
-  //   "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+  //   signer_address,
   //   6,
   //   msg,
   //   'SS Contract',
@@ -67,29 +73,29 @@ const main = async () => {
   
   //Execute
 
-   const executeResponse = await client.execute(
-        "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-        CONTRACT_ADDRESS,
-        {
-          create_stream: {
-            treasury: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-            name: "First Stream",
-            url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            in_denom: "ujuno",
-            out_denom: "uosmo",
-            out_supply: "1000000",
-            start_time: (new Date().getTime()*1000000 + 301*1000000000).toString(),
-            end_time: (new Date().getTime()*1000000 + 4000*1000000000).toString(),
-          }
-        },
-        "auto",
-        "Create Stream",
-        [coin(1000000, "uosmo")]
-      )
-      console.log(executeResponse)
+  //  const executeResponse = await client.execute(
+  //       signer_address,
+  //       CONTRACT_ADDRESS,
+  //       {
+  //         create_stream: {
+  //           treasury: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+  //           name: "First Stream",
+  //           url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  //           in_denom: "ujuno",
+  //           out_denom: "uosmo",
+  //           out_supply: "1000000",
+  //           start_time: (new Date().getTime()*1000000 + 301*1000000000).toString(),
+  //           end_time: (new Date().getTime()*1000000 + 4000*1000000000).toString(),
+  //         }
+  //       },
+  //       "auto",
+  //       "Create Stream",
+  //       [coin(1000000, "uosmo")]
+  //     )
+  //     console.log(executeResponse)
   
   // const executeResponse = await client.execute(
-  //   "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+  //   signer_address,
   //   CONTRACT_ADDRESS,
   //   {
   //     subscribe: {
@@ -104,11 +110,11 @@ const main = async () => {
 
   //Query
 
-  // const result = await client.queryContractSmart(CONTRACT_ADDRESS, {
-  //   stream: { stream_id: 1 },
-  // })
+  const result = await client.queryContractSmart(CONTRACT_ADDRESS, {
+    stream: { stream_id: 1 },
+  })
   
-  // console.log(result)
+  console.log(result)
   
   // const res = await client.queryContractSmart(CONTRACT_ADDRESS, {
   //   position: { stream_id: 1, owner: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm" },
