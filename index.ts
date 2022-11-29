@@ -73,10 +73,26 @@ const main = async () => {
   // )
 
   // console.log(response)
+
+  /* ############################## */
   
   //Execute
 
-  //Create Stream
+    //Update Distribution
+  
+  // const executeResponse = await client.execute(
+  //   signer_address,
+  //   CONTRACT_ADDRESS,
+  //   {
+  //     update_distribution: {
+  //       stream_id: 1,
+  //     },
+  //   },
+  //   "auto",
+  // )
+  // console.log(executeResponse) 
+
+    //Create Stream
 
   //  const executeResponse = await client.execute(
   //       signer_address,
@@ -99,7 +115,7 @@ const main = async () => {
   //     )
   //     console.log(executeResponse)
 
-  //Subscribe
+    //Subscribe
   
   // const executeResponse = await client.execute(
   //   signer_address,
@@ -115,21 +131,53 @@ const main = async () => {
   // )
   // console.log(executeResponse)
 
-  //Withdraw
+    //Withdraw
   
-  const executeResponse = await client.execute(
-    signer_address,
-    CONTRACT_ADDRESS,
-    {
-      withdraw: {
-        stream_id: 1,
-        cap: null,
-        position_owner: null
-      },
-    },
-    "auto",
-  )
-  console.log(executeResponse) 
+  // const executeResponse = await client.execute(
+  //   signer_address,
+  //   CONTRACT_ADDRESS,
+  //   {
+  //     withdraw: {
+  //       stream_id: 1,
+  //       cap: null,
+  //       position_owner: null
+  //     },
+  //   },
+  //   "auto",
+  // )
+  // console.log(executeResponse) 
+
+    //Exit Stream
+  
+  // const executeResponse = await client.execute(
+  //   signer_address,
+  //   CONTRACT_ADDRESS,
+  //   {
+  //     exit_stream: {
+  //       stream_id: 1,
+  //       position_owner: null
+  //     },
+  //   },
+  //   "auto",
+  // )
+  // console.log(executeResponse) 
+
+    //Finalize Stream
+  
+  // const executeResponse = await client.execute(
+  //   signer_address,
+  //   CONTRACT_ADDRESS,
+  //   {
+  //     finalize_stream: {
+  //       stream_id: 1,
+  //       position_owner: null
+  //     },
+  //   },
+  //   "auto",
+  // )
+  // console.log(executeResponse) 
+
+   /* ############################## */
 
   //Query Stream
 
