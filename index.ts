@@ -21,6 +21,9 @@ const MNEMONIC =
 //wasm1hnsk554472szj6ex0lpvhsfszdmuc2lnd72ket
 //"magnet prosper annual put weekend tomato join oil bottom pilot mother silly brush soft uncle drift profit shoe raccoon brand puzzle shock track hockey"
 
+//wasm18w0lvf7lpmqhsggs0wfcy6snnpzwzhyatv7kzg
+//senior print assume harvest charge alone another empty prepare hockey tired pony vivid bamboo slide describe build slab wife category escape jelly lamp come
+
 const CONTRACT_ADDRESS =
   "wasm1sr06m8yqg0wzqqyqvzvp5t07dj4nevx9u8qc7j4qa72qu8e3ct8qzuktnp"
 
