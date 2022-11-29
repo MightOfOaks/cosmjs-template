@@ -17,7 +17,7 @@ const MNEMONIC =
 "draft weird switch quality approve steel voice catch place apology million solar winter crunch expire accident rare enhance return genius praise peasant dress maid"
 
 const CONTRACT_ADDRESS =
-  "wasm12xmuhsl5lc2qmrdk4fhythgt733aswm9q5wppl2gq33l4nytdx0q7vnvfl"
+  "wasm1sr06m8yqg0wzqqyqvzvp5t07dj4nevx9u8qc7j4qa72qu8e3ct8qzuktnp"
 
 let signer: DirectSecp256k1HdWallet | LedgerSigner
 let client: SigningCosmWasmClient
@@ -47,15 +47,15 @@ const main = async () => {
   //Instantiate SS contract
   
   const msg = {
-    min_stream_seconds: 3600,
-    min_seconds_until_start_time: 300,
+    min_stream_seconds: "3600",
+    min_seconds_until_start_time: "300",
     stream_creation_denom: "uosmo",
-    stream_creation_fee: 10000000,
+    stream_creation_fee: "1000000",
     fee_collector: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
     }
 
   const response = await client.instantiate(
-    "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
+    "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
     6,
     msg,
     'SS Contract',
@@ -68,7 +68,7 @@ const main = async () => {
 
   //  const executeResponse = await client.execute(
   //       "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-  //       "Contract Address",
+  //       CONTRACT_ADDRESS,
   //       {
   //         create_stream: {
   //           treasury: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
@@ -87,7 +87,7 @@ const main = async () => {
   
   // const executeResponse = await client.execute(
   //   "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-  //   "Contract Address",
+  //   CONTRACT_ADDRESS,
   //   {
   //     subscribe: {
   //       stream_id: 1,
@@ -101,15 +101,17 @@ const main = async () => {
 
   //Query
 
-  const balance = async (address: string): Promise<string> => {
-    const result = await client.queryContractSmart("juno1z4chusdz400jydm7vcpurkpxrm0hfkj8pessnuyvpjn3p37s34yq8wxsyu", {
-      balance: { address },
-    })
-    return result.balance
-  }
-  console.log(await balance("wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm"))
+  // const result = await client.queryContractSmart(CONTRACT_ADDRESS, {
+  //   stream: { stream_id: 1 },
+  // })
   
+  // console.log(result)
+  
+  // const res = await client.queryContractSmart(CONTRACT_ADDRESS, {
+  //   position: { stream_id: 1, owner: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm" },
+  // })
 
+  // console.log(res)
 }
 
 main()
