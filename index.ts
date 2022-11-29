@@ -7,6 +7,7 @@ import { toUtf8 } from "@cosmjs/encoding"
 import { getSigner, getLedgerSigner } from "./wallet"
 import { coin } from "@cosmjs/amino"
 import { Timestamp } from "cosmjs-types/google/protobuf/timestamp"
+import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin"
 
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
@@ -46,44 +47,46 @@ const main = async () => {
 
   //Instantiate SS contract
   
-  const msg = {
-    min_stream_seconds: "3600",
-    min_seconds_until_start_time: "300",
-    stream_creation_denom: "uosmo",
-    stream_creation_fee: "1000000",
-    fee_collector: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-    }
+  // const msg = {
+  //   min_stream_seconds: "3600",
+  //   min_seconds_until_start_time: "300",
+  //   stream_creation_denom: "uosmo",
+  //   stream_creation_fee: "1000000",
+  //   fee_collector: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+  //   }
 
-  const response = await client.instantiate(
-    "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-    6,
-    msg,
-    'SS Contract',
-    "auto"
-  )
+  // const response = await client.instantiate(
+  //   "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+  //   6,
+  //   msg,
+  //   'SS Contract',
+  //   "auto"
+  // )
 
-  console.log(response)
+  // console.log(response)
   
   //Execute
 
-  //  const executeResponse = await client.execute(
-  //       "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-  //       CONTRACT_ADDRESS,
-  //       {
-  //         create_stream: {
-  //           treasury: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-  //           name: "First Stream",
-  //           url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-  //           in_denom: "uosmo",
-  //           out_denom: "usomething",
-  //           out_supply: 100000000000,
-  //           start_time: new Date().getTime()*1000000 + 300*1000000000,
-  //           end_time: new Date().getTime()*1000000 + 3600*1000000000,
-  //         }
-  //       },
-  //       "auto",
-  //     )
-  //     console.log(executeResponse)
+   const executeResponse = await client.execute(
+        "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+        CONTRACT_ADDRESS,
+        {
+          create_stream: {
+            treasury: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
+            name: "First Stream",
+            url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            in_denom: "ujuno",
+            out_denom: "uosmo",
+            out_supply: "1000000",
+            start_time: (new Date().getTime()*1000000 + 301*1000000000).toString(),
+            end_time: (new Date().getTime()*1000000 + 4000*1000000000).toString(),
+          }
+        },
+        "auto",
+        "Create Stream",
+        [coin(1000000, "uosmo")]
+      )
+      console.log(executeResponse)
   
   // const executeResponse = await client.execute(
   //   "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
