@@ -1,17 +1,21 @@
 {
-  "name": "cosmjs-template",
-  "version": "1.0.0",
-  "description": "A starter template for quick CosmJS prototyping",
-  "main": "index.js",
-  "repository": "https://github.com/deus-labs/cosmjs-template",
-  "license": "MIT",
-  "private": false,
-  "devDependencies": {
-    "@types/node": "^17.0.12",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.5"
+  "name": "nexttest",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
+    "@types/node": "18.11.9",
+    "@types/react": "18.0.25",
+    "@types/react-dom": "18.0.9",
+    "next": "13.0.5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "4.9.3",
     "@cosmjs/amino": "^0.27.0",
     "@cosmjs/cosmwasm-stargate": "^0.27.0",
     "@cosmjs/encoding": "^0.27.0",
@@ -21,7 +25,9 @@
     "@ledgerhq/hw-transport-node-hid": "^6.20.0",
     "cosmjs-types": "^0.4.1"
   },
-  "scripts": {
-    "start": "npx ts-node index.ts"
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.19",
+    "tailwindcss": "^3.2.4"
   }
 }
