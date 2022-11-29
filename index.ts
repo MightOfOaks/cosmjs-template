@@ -49,11 +49,15 @@ const main = async () => {
     }
   )
   console.log((await signer.getAccounts())[0].address)
-  //client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1fvpmck9vtf2ys85zvtud2ss5pr63sh0th3yf32072g7s23emk5vs4u4lve', 1174, {}, 'auto')
-  console.log(await client.getContracts(1268))
+  //client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1r03wvtf3pn3rdn4ln4y8n0mlu2exuvlgzfh5rlgedlxpup8gs27q4xp3zw', 1960, {}, 'auto')
+  console.log(await client.getContracts(1356))
   console.log(await client.getContractCodeHistory("juno143rmxg4khjkxzk56pd3tru6wapenwls20y3shahlc5p9zgddyk8q27n0k4"))
-  // console.log(await client.getContract("juno1mfx2wy7g87mv42mnvrqktplggqwqh7phvehk7sfpamgrqvzmln0qkkulak"))
-  
+  //console.log(await client.getContract("juno1f24r78hqzplku9raquzuw7tvf22ccs9s45rtln5zyg2yr5nlslgqww8duq"))
+  // let byteArray = [75, 61, 245, 211, 88, 240, 146, 230, 104, 211, 89, 66, 96, 29, 42, 200, 252, 146, 136, 247, 110, 167, 73, 146, 112, 141, 120, 154, 12, 57, 194, 9]
+  // let hex = byteArray.map(byte => {
+  //   return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  // }).join('');
+  // console.log(hex)
   // console.log(await client.getCodeDetails(752))
   // console.log(await client.getBlock())
   // console.log(await signer.getAccounts())
@@ -99,18 +103,22 @@ const main = async () => {
   //   //   },
   //   }
   
+  // const msg = {
+  //   owner: 'juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5',
+  //   cw20_token_address: 'juno1ryny53rjvqhzhusv3aczw5rx8ehs26m9d243hekm3hkkcdcgf5tq038sr3',
+  //   native_token: null
+  // }
 
-  // const label = 'Test Coin'
-  // let senderAddress = (await signer.getAccounts())[0].address
+  // const label = 'T0142 Test'
   // const response = await client.instantiate(
-  //  senderAddress,
-  //   15,
+  //   'juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5',
+  //   1356,
   //   msg,
   //   label,
   //   "auto"
   // )
 
-  // console.log(response)
+  //  console.log(response)
 
   //RAW QUERY
   // console.log(Buffer.from("balance").toString("hex"))
@@ -130,17 +138,19 @@ const main = async () => {
   // console.log(res)
 
   // let res = await client.queryContractRaw(
-  //   "juno19j78q9l3zqm6c4mavyv0j055xcm48ust80y5lrznax4jt43rpkmsz8zl7s",
+  //   "juno1r03wvtf3pn3rdn4ln4y8n0mlu2exuvlgzfh5rlgedlxpup8gs27q4xp3zw",
   //   toUtf8(
   //     Buffer.from(
-  //       // "000C" +
-  //       Buffer.from("config").toString("hex"),
+  //       //"000B" +
+  //       Buffer.from("contract_info").toString("hex"),
   //       // Buffer.from("mint_module").toString("hex"),
   //       "hex"
   //     ).toString()
   //   )
   // )
   // console.log(res)
+  // console.log(new TextDecoder().decode(res as Uint8Array))
+  // console.log(JSON.parse(new TextDecoder().decode(res as Uint8Array)))
   
   // Query Balance
 
