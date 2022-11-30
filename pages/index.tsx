@@ -10,7 +10,7 @@ import { DirectSecp256k1HdWallet, EncodeObject } from "@cosmjs/proto-signing";
 import { LedgerSigner } from "@cosmjs/ledger-amino";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { toUtf8 } from "@cosmjs/encoding";
-import { getSigner, getLedgerSigner } from "../wallet";
+import { getSigner } from "../wallet";
 import { coin } from "@cosmjs/amino";
 import { Timestamp } from "cosmjs-types/google/protobuf/timestamp";
 import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
@@ -20,19 +20,6 @@ const IS_TESTNET = !process.argv.includes("--mainnet");
 
 const MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi";
 const TESTNET_RPC = "https://rpc.streamswap-devnet.omniflix.co:443/";
-
-let client: SigningCosmWasmClient
-
-let subscribe = (person:any) => {
-  let signer = getSigner(person.mnemonic).then((signer) => {let client =SigningCosmWasmClient.connectWithSigner(
-    TESTNET_RPC,
-    signer,
-    {
-      prefix: "wasm",
-      gasPrice: GasPrice.fromString("0.025uwasm"),
-    }
-  )}).then((client) => {console.log(client)})
-  }
 
 let Bob = {
   address: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
@@ -65,27 +52,11 @@ let Rick = {
 
 export default function Home() {
   return (
-    <div className='ml-9 mt-40  flex-auto '>
-     <span>
-      <h1 className='h-10 font-bold'>Rick</h1>
-      {JSON.stringify(Rick)}</span>
-      <button onClick={subscribe(Rick)}>
-        subscribe to stream 
-      </button>
-     <span>
-     <h1 className='h-10 font-bold'>Alice</h1>
-     {JSON.stringify(Alice)}
-     <button onClick={subscribe}>
-        subscribe to stream 
-      </button>
-     </span>
-     <span><h1 className='h-10 font-bold'>Bob</h1>
-      {JSON.stringify(Bob)}
-      <button onClick={subscribe}>
-        subscribe to stream 
-      </button>
-      </span>
-
+    <div className='ml-9 mt-40  flex flex-col'>
+      <input type={'text'} defaultValue={JSON.stringify(Rick)} className='w-1/3 h-48 border-2 border-black overflow-scroll overflow-x-auto'/>
+      <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
+      <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
+      <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
 
     </div>
 
