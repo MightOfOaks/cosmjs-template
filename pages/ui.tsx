@@ -1,5 +1,5 @@
 import {
-  CosmWasmClient,
+CosmWasmClient,
   SigningCosmWasmClient,
 } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
@@ -61,13 +61,14 @@ const [minStreamSeconds, setMinStreamSeconds] = useState("");
 const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("");
 const [streamCreationDenom, setStreamCreationDenom] = useState("");
 const [streamCreationFee, setStreamCreationFee] = useState("");
-const [feeCollector, setFeeCollector] = useState("");
+const [feeCollector, setFeeCollector] = useState(treasury.address);
 //state definitions for users positions
 const [contracts , setcontracts] = useState<readonly string[]>([]);
 const [positionBob , setPositionBob] = useState("");
 const [positionAlice , setPositionAlice] = useState("");
 const [positionRick , setPositionRick] = useState("");
 const [streamData, setStreamData] = useState("");
+const [configData, setConfigData] = useState("");
 
 const [signerBob, setSignerBob] = useState<DirectSecp256k1HdWallet>();
 const [signerAlice, setSignerAlice] = useState<DirectSecp256k1HdWallet>();
@@ -82,6 +83,8 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
 //query params
 const [streamId , setStreamId] = useState(1);
 const [height , setHeight] = useState<any>();
+const [codeId , setCodeId] = useState(6);
+
   
   const init = async () => {
     setSignerBob(await getSigner(Bob.mnemonic))
@@ -140,6 +143,9 @@ const [height , setHeight] = useState<any>();
       if (clientTreasury) {
       const streamContracts = await clientTreasury?.getContracts(6)
       setcontracts(streamContracts)
+      const configRes= await clientTreasury?.queryContractRaw(contractAddress,toUtf8(Buffer.from(Buffer.from("config").toString("hex"),"hex").toString()))
+      let decodedRes = JSON.parse(new TextDecoder().decode(configRes as Uint8Array))
+      setConfigData((JSON.stringify(decodedRes, null, 2).trim()))
     }
     }
     getContracts()
@@ -153,25 +159,22 @@ const [height , setHeight] = useState<any>();
       ,time: new Date(blockInfo?.header.time).toLocaleString()},null,2).trim())
 
       }
-      else{
-        throw new Error("clientTreasury is undefined")
-      }
     }
     getHeight()  
   }, 10000)
 
   const instantiate = async () => {
     const msg = {
-    min_stream_seconds: "300",
-    min_seconds_until_start_time: "10",
-    stream_creation_denom: "uosmo",
-    stream_creation_fee: "1000000",
+    min_stream_seconds: minStreamSeconds,
+    min_seconds_until_start_time: minSecondsUntilStartTime,
+    stream_creation_denom: streamCreationDenom,
+    stream_creation_fee: streamCreationFee,
     fee_collector: treasury.address,
   }
 
-  const response = await clientBob?.instantiate(
-    Bob.address,
-    6,
+  const response = await clientTreasury?.instantiate(
+    treasury.address,
+    codeId,
     msg,
     'SS Contract',
     "auto"
@@ -266,6 +269,18 @@ const [height , setHeight] = useState<any>();
 
 
   return (
+  <div> 
+    <div className="mt-10">
+        <label className='mx-2 font-bold'>Wallet details</label>
+        <br />
+        <span>Treasury:{JSON.stringify(treasury)}</span>
+        <br />
+        <span>Bob:{JSON.stringify(Bob)}</span>
+        <br />
+        <span>Alice:{JSON.stringify(Alice)}</span>
+        <br />
+        <span>Rick:{JSON.stringify(Rick)}</span>
+        </div>
     <div className='ml-9 mt-40  flex flex-col'>
       <div className='top-0 absolute mt-1 '>
         {height}
@@ -274,6 +289,8 @@ const [height , setHeight] = useState<any>();
         <div className='flex flex-col'>
         <span>Stream Instantiation Parameters</span>
         
+        <label className='mt-2'>Code Id</label>
+        <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={codeId} onChange={e => setCodeId(Number(e.target.value))} />
         <label className='mt-2'>Min Stream Seconds</label>
         <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={minStreamSeconds} onChange={e => setMinStreamSeconds(e.target.value)} />
         <label className='mt-2'>Min Seconds Until Start Time</label>
@@ -286,6 +303,7 @@ const [height , setHeight] = useState<any>();
         <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={feeCollector} onChange={e => setFeeCollector(e.target.value)} />
           <button className='mt-2 border-4 border-black' onClick={instantiate}>Instantiate
           </button>
+          <label className='mt-2'>Contracts instantiated with Code Id of {codeId}</label>
           {contracts.map((contract, index) => (
             <div key={index}>
               <span>{contract}</span>
@@ -323,22 +341,23 @@ const [height , setHeight] = useState<any>();
 
 
         </div>
-        <div className="flex flex-col mx-5 mb-10 w-full">
+        <div className="flex flex-row mx-5 mb-10 w-full">
         {/* <input className='w-full h-full border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamData}/> */}
         <div className="overflow-auto p-2 w-1/2 text-2xl text-orange-800 border-2 border-black h-full font-mono">
           <pre>{streamData}</pre>
         </div>
-         <div className="flex flex-row">
+         <div className="overflow-auto p-2 w-1/2 text-2xl text-blue-800 border-2 border-black h-full font-mono">
+          <pre>{configData}</pre>
+        </div>
+
+          </div>
+      </div>  
+         <div className="flex flex-row ml-">
           <button className="w-[100px] border-2 rounded-sm" onClick={queryStream}>Query Stream</button>
           <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
           <label className='mx-4 mt-4'>Stream Id</label>
-          <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamId} onChange={e => setStreamId(e.target.value)}/>
+          <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(e.target.value)}/>
          </div>
-         <div>
-          
-         </div>
-          </div>
-      </div>  
      
       <input type={'text'} defaultValue={JSON.stringify(Rick)} className='w-full h-48 border-2 border-black overflow-scroll overflow-x-auto'/>
       <div className="flex flex-row mb-8">
@@ -351,6 +370,7 @@ const [height , setHeight] = useState<any>();
       <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
       <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
 
+    </div>
     </div>
 
   )
