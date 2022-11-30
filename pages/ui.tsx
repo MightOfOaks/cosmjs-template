@@ -14,6 +14,8 @@ import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
 import { NextPage } from "next";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { InputDateTime } from "../components/InputDateTime";
+import {treasury, Rick, Alice, Bob} from '../Users'
+import { Any } from "cosmjs-types/google/protobuf/any";
 
 interface InstantiationParams {
     min_stream_seconds: string,
@@ -39,41 +41,8 @@ const IS_TESTNET = !process.argv.includes("--mainnet");
 const MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi";
 const TESTNET_RPC = "https://rpc.streamswap-devnet.omniflix.co:443/";
 
-let treasury = {
-  address: "wasm15nrpfjj85qm9l2qsc0d67qxq7w5p0h8p9pkypj",
-  mnemonic:"real clarify canoe much tackle quiz jaguar test sad there patrol mixed cost clock crater cabin toilet culture later over pattern innocent reunion sunset",
-};
-
-let Bob = {
-  address: "wasm1lwcrr9ktsmn2f7fej6gywxcm8uvxlzz5ch40hm",
-  mnemonic:
-    "draft weird switch quality approve steel voice catch place apology million solar winter crunch expire accident rare enhance return genius praise peasant dress maid",
-  moneyTospend: 1000000,
-  //when did he enter the stream
-  at_time: 1 / 12,
-  withdraw_time: 1 / 6,
-};
-
-let Alice = {
-  address: "wasm1hnsk554472szj6ex0lpvhsfszdmuc2lnd72ket",
-  mnemonic:
-    "magnet prosper annual put weekend tomato join oil bottom pilot mother silly brush soft uncle drift profit shoe raccoon brand puzzle shock track hockey",
-  moneyTospend: 500000,
-  //when did he enter the stream
-  at_time: 1 / 5,
-};
-
-let Rick = {
-  address: "wasm18w0lvf7lpmqhsggs0wfcy6snnpzwzhyatv7kzg",
-  mnemonic:
-    "senior print assume harvest charge alone another empty prepare hockey tired pony vivid bamboo slide describe build slab wife category escape jelly lamp come",
-  moneyTospend: 300000000,
-  //when did he enter the stream
-  at_time: 1 / 2,
-};
 
 const Home: NextPage = () => {
-const [streamInfo, setStreamInfo] = useState("");
 // const [instantiationParams, setInstantiationParams] = useState<InstantiationParams>();
 // const [createStreamParams, setCreateStreamParams] = useState<CreateStreamParams>();
 //state definitions for CreateStreamParams
@@ -85,16 +54,25 @@ const [outDenom, setOutDenom] = useState("");
 const [outSupply, setOutSupply] = useState("");
 const [startTime, setStartTime] = useState<Date | undefined>(undefined);
 const [endTime, setEndTime] = useState<Date | undefined>(undefined);
+const [contractAddress, setcontractAddress] = useState("wasm1hnvfl0z2madv8k505msf9f4lztjtv9sh4pf5z4tjxpuded337unq9zfem0");
 //state definitions for InstantiationParams
 const [minStreamSeconds, setMinStreamSeconds] = useState("");
 const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("");
 const [streamCreationDenom, setStreamCreationDenom] = useState("");
 const [streamCreationFee, setStreamCreationFee] = useState("");
 const [feeCollector, setFeeCollector] = useState("");
+//state definitions for users positions
+const [contracts , setcontracts] = useState<readonly string[]>([]);
+const [positionBob , setPositionBob] = useState("");
+const [positionAlice , setPositionAlice] = useState("");
+const [positionRick , setPositionRick] = useState("");
+const [streamData, setStreamData] = useState("");
 
 
-  const CONTRACT_ADDRESS =
-  "wasm1sr06m8yqg0wzqqyqvzvp5t07dj4nevx9u8qc7j4qa72qu8e3ct8qzuktnp"
+
+
+
+
 
   let signerBob, signerAlice, signerRick, signerTreasury : DirectSecp256k1HdWallet
   let clientBob: SigningCosmWasmClient
@@ -143,7 +121,10 @@ const [feeCollector, setFeeCollector] = useState("");
       gasPrice: GasPrice.fromString("0.025uwasm"),
     }
   )
+  const streamContracts = await clientTreasury.getContracts(6)
+  setcontracts(streamContracts)
   }
+  
 
   useEffect (() => {
     init()
@@ -165,12 +146,14 @@ const [feeCollector, setFeeCollector] = useState("");
     'SS Contract',
     "auto"
   )
+  setcontractAddress(response.contractAddress)
   }
+
 
   const createStream = async () => {
     const executeResponse = await clientBob.execute(
-            Bob.address,
-            CONTRACT_ADDRESS,
+            treasury.address,
+            contractAddress,
             {
               create_stream: {
                 treasury: Bob.address,
@@ -192,7 +175,7 @@ const [feeCollector, setFeeCollector] = useState("");
 
   const updateDistribution = async () => {
     const response = await clientBob.execute(Bob.address,
-      CONTRACT_ADDRESS,
+      contractAddress,
       {
         update_distribution: {
           stream_id: 1,
@@ -205,17 +188,17 @@ const [feeCollector, setFeeCollector] = useState("");
 
   const queryStream = async () => {
     const response = await clientBob.queryContractSmart(
-      CONTRACT_ADDRESS,
+      contractAddress,
     {
       stream: { stream_id: 1 },
     })
     console.log(response)
-    setStreamInfo(JSON.stringify(response))
+    setStreamData(JSON.stringify(response))
   }
 
   const queryPositionBob = async () => {
     const response = await clientBob.queryContractSmart(
-      CONTRACT_ADDRESS,
+      contractAddress,
     {
       position: { stream_id: 1, owner: Bob.address },
     })
@@ -224,7 +207,7 @@ const [feeCollector, setFeeCollector] = useState("");
 
   const subscribeBob = async () => {
     const response = await clientBob.execute(Bob.address,
-      CONTRACT_ADDRESS,
+      contractAddress,
       {
         subscribe: {
           stream_id: 1,
@@ -250,7 +233,7 @@ const [feeCollector, setFeeCollector] = useState("");
 
   return (
     <div className='ml-9 mt-40  flex flex-col'>
-      <div className='flex flex-row'>
+      <div className='flex flex-row '>
         <div className='flex flex-col'>
         <span>Stream Instantiation Parameters</span>
         
@@ -264,32 +247,53 @@ const [feeCollector, setFeeCollector] = useState("");
         <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamCreationFee} onChange={e => setStreamCreationFee(e.target.value)} />
         <label className='mt-2'>Fee Collector</label>
         <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={feeCollector} onChange={e => setFeeCollector(e.target.value)} />
-
+          <button className='mt-2 border-4 border-black' onClick={instantiate}>Instantiate
+          </button>
+          {contracts.map((contract, index) => (
+            <div key={index}>
+              <span>{contract}</span>
+            </div>
+          ))}
 
         </div>
         <div className='flex flex-col ml-4'>
           <span>Stream Creation Parameters</span>
-          
+          <label className="mt-2" > Contract adddress</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={contractAddress} onChange={e => setcontractAddress(e.target.value)} />
+          <label className="mt-2">Treasury Address</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={treasuryAddress} onChange={e => setTreasuryAddress(e.target.value)} />
+          <label className="mt-2"> Name</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={name} onChange={e => setName(e.target.value)} />
+          <label className="mt-2">Url</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={url} onChange={e => setUrl(e.target.value)} />
+          <label className="mt-2">inDenom</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={inDenom} onChange={e => setInDenom(e.target.value)} />
+          <label className="mt-2">Out Denom</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={outDenom} onChange={e => setOutDenom(e.target.value)} />
+          <label className="mt-2">Out supply</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={outSupply} onChange={e => setOutSupply(e.target.value)} />
           <label className='mt-2'>Start Time</label>
           <div className="border-2 border-black mt-2">
             <InputDateTime minDate={new Date()} onChange={(date: SetStateAction<Date | undefined>) => setStartTime(date)} value={startTime} />
           </div>
+          <label className='mt-2'>End Time</label>
+          <div className="border-2 border-black mt-2">
+            <InputDateTime minDate={new Date()} onChange={(date: SetStateAction<Date | undefined>) => setEndTime(date)} value={endTime} />
+          </div>
+          <button className='mt-2 border-4 border-black' onClick={createStream}>Create Stream
+          </button>
+
 
         </div>
-      </div>  
-      <div className="flex flex-col mb-10">
-        <input className='w-full h-48 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamInfo}/>
+        <div className="flex flex-col mx-5 mb-10 w-full">
+        <input className='w-full h-full border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamData}/>
         <div className="flex flex-row">
           <button className="w-[100px] border-2 rounded-sm" onClick={queryStream}>Query Stream</button>
           <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
          </div>
       </div>
+      </div>  
+     
       <input type={'text'} defaultValue={JSON.stringify(Rick)} className='w-full h-48 border-2 border-black overflow-scroll overflow-x-auto'/>
       <div className="flex flex-row mb-8">
         <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionBob}>Query Bob's Position</button>
