@@ -121,10 +121,6 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
       gasPrice: GasPrice.fromString("0.025uwasm"),
     }
   ))
-
-  const streamContracts = await clientTreasury?.getContracts(6)
-  if(streamContracts)
-  setcontracts(streamContracts)
   }
   
 
@@ -132,6 +128,17 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
     init()
     console.log(clientTreasury)
   }, [])
+
+  useEffect(() => {
+    //define async function
+    const getContracts = async () => {
+      if (clientTreasury) {
+      const streamContracts = await clientTreasury?.getContracts(6)
+      setcontracts(streamContracts)
+    }
+    }
+    getContracts()
+  }, [clientTreasury])
 
   const instantiate = async () => {
     const msg = {
