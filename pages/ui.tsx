@@ -14,8 +14,9 @@ import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
 import { NextPage } from "next";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { InputDateTime } from "../components/InputDateTime";
-import {treasury, Rick, Alice, Bob} from '../users'
+import {treasury, Rick, Alice, Bob} from '../Users'
 import { Any } from "cosmjs-types/google/protobuf/any";
+import { time } from "console";
 
 interface InstantiationParams {
     min_stream_seconds: string,
@@ -46,15 +47,15 @@ const Home: NextPage = () => {
 // const [instantiationParams, setInstantiationParams] = useState<InstantiationParams>();
 // const [createStreamParams, setCreateStreamParams] = useState<CreateStreamParams>();
 //state definitions for CreateStreamParams
-const [treasuryAddress, setTreasuryAddress] = useState("");
+const [treasuryAddress, setTreasuryAddress] = useState(treasury.address);
 const [name, setName] = useState("");
-const [url, setUrl] = useState("");
-const [inDenom, setInDenom] = useState("");
-const [outDenom, setOutDenom] = useState("");
-const [outSupply, setOutSupply] = useState("");
+const [url, setUrl] = useState("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+const [inDenom, setInDenom] = useState("ujuno");
+const [outDenom, setOutDenom] = useState("uosmo");
+const [outSupply, setOutSupply] = useState("1000000");
 const [startTime, setStartTime] = useState<Date | undefined>(undefined);
 const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-const [contractAddress, setcontractAddress] = useState("wasm1hnvfl0z2madv8k505msf9f4lztjtv9sh4pf5z4tjxpuded337unq9zfem0");
+const [contractAddress, setcontractAddress] = useState("wasm1sr06m8yqg0wzqqyqvzvp5t07dj4nevx9u8qc7j4qa72qu8e3ct8qzuktnp");
 //state definitions for InstantiationParams
 const [minStreamSeconds, setMinStreamSeconds] = useState("");
 const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("");
@@ -77,6 +78,10 @@ const [clientBob, setClientBob] = useState<SigningCosmWasmClient>();
 const [clientAlice, setClientAlice] = useState<SigningCosmWasmClient>();
 const [clientRick, setClientRick] = useState<SigningCosmWasmClient>();
 const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
+
+//query params
+const [streamId , setStreamId] = useState(1);
+const [height , setHeight] = useState<any>();
   
   const init = async () => {
     setSignerBob(await getSigner(Bob.mnemonic))
@@ -140,6 +145,21 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
     getContracts()
   }, [clientTreasury])
 
+  setInterval(() => {
+    const getHeight = async () => {
+      if (clientTreasury) {
+      const blockInfo = await clientTreasury?.getBlock()
+      setHeight(JSON.stringify({height: blockInfo?.header.height
+      ,time: new Date(blockInfo?.header.time).toLocaleString()},null,2).trim())
+
+      }
+      else{
+        throw new Error("clientTreasury is undefined")
+      }
+    }
+    getHeight()  
+  }, 10000)
+
   const instantiate = async () => {
     const msg = {
     min_stream_seconds: "300",
@@ -162,24 +182,25 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
 
 
   const createStream = async () => {
-    const executeResponse = await clientBob?.execute(
+    console.log(clientTreasury)
+    const executeResponse = await clientTreasury?.execute(
             treasury.address,
             contractAddress,
             {
               create_stream: {
-                treasury: Bob.address,
-                name: "First Stream",
+                treasury: treasury.address,
+                name: name,
                 url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                in_denom: "ujuno",
-                out_denom: "uosmo",
-                out_supply: "1000000",
-                start_time: (new Date().getTime()*1000000 + 301*1000000000).toString(),
-                end_time: (new Date().getTime()*1000000 + 4000*1000000000).toString(),
+                in_denom: inDenom,
+                out_denom: outDenom, 
+                out_supply: outSupply,
+                start_time: (Number(startTime)*1000000).toString(),
+                end_time: (Number(endTime)*1000000).toString(),
               }
             },
             "auto",
             "Create Stream",
-            [coin(1000000, "uosmo")]
+            [coin(outSupply, "uosmo"),coin(streamCreationFee, "uosmo")]
           )
           console.log(executeResponse)
   }
@@ -203,10 +224,10 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
     const response = await clientTreasury?.queryContractSmart(
       contractAddress,
     {
-      stream: { stream_id: 1 },
+      stream: { stream_id: streamId },
     })
     console.log(response)
-    setStreamData(JSON.stringify(response))
+    setStreamData(JSON.stringify(response,undefined,2).trim())
   }
 
   const queryPositionBob = async () => {
@@ -236,7 +257,7 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
   const testStream = async () => {
     
     await new Promise(r => setTimeout(r, 5000));
-  
+    
   }
 
 
@@ -246,6 +267,9 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
 
   return (
     <div className='ml-9 mt-40  flex flex-col'>
+      <div className='top-0 absolute mt-1 '>
+        {height}
+        </div>
       <div className='flex flex-row '>
         <div className='flex flex-col'>
         <span>Stream Instantiation Parameters</span>
@@ -295,16 +319,25 @@ const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
           </div>
           <button className='mt-2 border-4 border-black' onClick={createStream}>Create Stream
           </button>
+          
 
 
         </div>
         <div className="flex flex-col mx-5 mb-10 w-full">
-        <input className='w-full h-full border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamData}/>
-        <div className="flex flex-row">
+        {/* <input className='w-full h-full border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamData}/> */}
+        <div className="overflow-auto p-2 w-1/2 text-2xl text-orange-800 border-2 border-black h-full font-mono">
+          <pre>{streamData}</pre>
+        </div>
+         <div className="flex flex-row">
           <button className="w-[100px] border-2 rounded-sm" onClick={queryStream}>Query Stream</button>
           <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
+          <label className='mx-4 mt-4'>Stream Id</label>
+          <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamId} onChange={e => setStreamId(e.target.value)}/>
          </div>
-      </div>
+         <div>
+          
+         </div>
+          </div>
       </div>  
      
       <input type={'text'} defaultValue={JSON.stringify(Rick)} className='w-full h-48 border-2 border-black overflow-scroll overflow-x-auto'/>
