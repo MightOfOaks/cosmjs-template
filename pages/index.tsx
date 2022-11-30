@@ -336,8 +336,8 @@ import {
   
   
     return (
-    <div> 
-      <div className="mt-10">
+    <div className="mx-8"> 
+      <div className="ml-8 mt-10">
           <label className='mx-2 font-bold'>Wallet details</label>
           <br />
           <span>Treasury:{JSON.stringify(treasury)}</span>
@@ -347,8 +347,8 @@ import {
           <span>Alice:{JSON.stringify(Alice)}</span>
           <br />
           <span>Rick:{JSON.stringify(Rick)}</span>
-          </div>
-      <div className='ml-9 mt-40  flex flex-col'>
+      </div>
+      <div className='ml-8 mt-40  flex flex-col'>
         <div className='top-0 absolute mt-1 '>
           {height}
           </div>
@@ -370,10 +370,10 @@ import {
             <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={feeCollector} onChange={e => setFeeCollector(e.target.value)} />
               <button className='mt-2 border-4 border-black' onClick={instantiate}>Instantiate
               </button>
-              <label className='mt-2'>Contracts instantiated with Code Id of {codeId}</label>
+              <label className='mt-2 underline'>Contracts instantiated with the Code Id of {codeId}</label>
               {contracts.map((contract, index) => (
                 <div key={index}>
-                  <span className="text-xs">{contract}</span>
+                  <span className="text-lg">{contract}</span>
                 </div>
               ))}
   
@@ -414,10 +414,10 @@ import {
           </div>
           <div className='flex flex-col ml-4 w-full'>
             <div className="flex flex-row mx-5 mb-10 w-full">        
-              <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+              <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
                 <pre>{streamData}</pre>
               </div>
-              <div className="overflow-auto p-2 w-full text-2xl text-blue-800 border-2 border-black h-full font-mono">
+              <div className="overflow-auto p-2 mx-2 w-full text-lg text-blue-800 border-2 border-black h-full font-mono">
                 <pre>{configData}</pre>
               </div>
   
