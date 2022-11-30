@@ -14,7 +14,7 @@ import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
 import { NextPage } from "next";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { InputDateTime } from "../components/InputDateTime";
-import {treasury, Rick, Alice, Bob} from '../Users'
+import {treasury, Rick, Alice, Bob} from '../users'
 import { Any } from "cosmjs-types/google/protobuf/any";
 
 interface InstantiationParams {
@@ -68,66 +68,69 @@ const [positionAlice , setPositionAlice] = useState("");
 const [positionRick , setPositionRick] = useState("");
 const [streamData, setStreamData] = useState("");
 
+const [signerBob, setSignerBob] = useState<DirectSecp256k1HdWallet>();
+const [signerAlice, setSignerAlice] = useState<DirectSecp256k1HdWallet>();
+const [signerRick, setSignerRick] = useState<DirectSecp256k1HdWallet>();
+const [signerTreasury, setSignerTreasury] = useState<DirectSecp256k1HdWallet>();
 
-
-
-
-
-
-  let signerBob, signerAlice, signerRick, signerTreasury : DirectSecp256k1HdWallet
-  let clientBob: SigningCosmWasmClient
-  let clientAlice: SigningCosmWasmClient
-  let clientRick: SigningCosmWasmClient
-  let clientTreasury: SigningCosmWasmClient
+const [clientBob, setClientBob] = useState<SigningCosmWasmClient>();
+const [clientAlice, setClientAlice] = useState<SigningCosmWasmClient>();
+const [clientRick, setClientRick] = useState<SigningCosmWasmClient>();
+const [clientTreasury, setClientTreasury] = useState<SigningCosmWasmClient>();
   
   const init = async () => {
-    signerBob = await getSigner(Bob.mnemonic);
-    signerAlice = await getSigner(Alice.mnemonic);
-    signerRick = await getSigner(Rick.mnemonic);
-    signerTreasury = await getSigner(treasury.mnemonic);
+    setSignerBob(await getSigner(Bob.mnemonic))
+    setSignerAlice(await getSigner(Alice.mnemonic))
+    setSignerRick(await getSigner(Rick.mnemonic))
+    setSignerTreasury(await getSigner(treasury.mnemonic))
+
+  
     
-    clientBob = await SigningCosmWasmClient.connectWithSigner(
+    setClientBob(await SigningCosmWasmClient.connectWithSigner(
     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerBob,
+    signerBob as DirectSecp256k1HdWallet,
     {
       prefix: "wasm",
       gasPrice: GasPrice.fromString("0.025uwasm"),
     }
-  )
+  ))
 
-  clientAlice = await SigningCosmWasmClient.connectWithSigner(
+  setClientAlice(await SigningCosmWasmClient.connectWithSigner(
     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerAlice,
+    signerAlice as DirectSecp256k1HdWallet,
     {
       prefix: "wasm",
       gasPrice: GasPrice.fromString("0.025uwasm"),
     }
-  )
+  ))
 
-  clientRick = await SigningCosmWasmClient.connectWithSigner(
+  setClientRick(await SigningCosmWasmClient.connectWithSigner(
     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerRick,
+    signerRick as DirectSecp256k1HdWallet,
     {
       prefix: "wasm",
       gasPrice: GasPrice.fromString("0.025uwasm"),
     }
-  )
+  ))
 
-  clientTreasury = await SigningCosmWasmClient.connectWithSigner(
+  setClientTreasury(await SigningCosmWasmClient.connectWithSigner(
     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerTreasury,
+    signerTreasury as DirectSecp256k1HdWallet,
     {
       prefix: "wasm",
       gasPrice: GasPrice.fromString("0.025uwasm"),
     }
-  )
-  const streamContracts = await clientTreasury.getContracts(6)
+  ))
+
+  const streamContracts = await clientTreasury?.getContracts(6)
+  if(streamContracts)
   setcontracts(streamContracts)
   }
   
 
   useEffect (() => {
     init()
+    console.log(clientTreasury)
   }, [])
 
   const instantiate = async () => {
@@ -139,19 +142,20 @@ const [streamData, setStreamData] = useState("");
     fee_collector: treasury.address,
   }
 
-  const response = await clientBob.instantiate(
+  const response = await clientBob?.instantiate(
     Bob.address,
     6,
     msg,
     'SS Contract',
     "auto"
   )
+  if(response)
   setcontractAddress(response.contractAddress)
   }
 
 
   const createStream = async () => {
-    const executeResponse = await clientBob.execute(
+    const executeResponse = await clientBob?.execute(
             treasury.address,
             contractAddress,
             {
@@ -174,7 +178,7 @@ const [streamData, setStreamData] = useState("");
   }
 
   const updateDistribution = async () => {
-    const response = await clientBob.execute(Bob.address,
+    const response = await clientBob?.execute(Bob.address,
       contractAddress,
       {
         update_distribution: {
@@ -187,7 +191,9 @@ const [streamData, setStreamData] = useState("");
   }
 
   const queryStream = async () => {
-    const response = await clientBob.queryContractSmart(
+    console.log(contractAddress)
+    console.log(clientTreasury)
+    const response = await clientTreasury?.queryContractSmart(
       contractAddress,
     {
       stream: { stream_id: 1 },
@@ -197,7 +203,7 @@ const [streamData, setStreamData] = useState("");
   }
 
   const queryPositionBob = async () => {
-    const response = await clientBob.queryContractSmart(
+    const response = await clientBob?.queryContractSmart(
       contractAddress,
     {
       position: { stream_id: 1, owner: Bob.address },
@@ -206,7 +212,7 @@ const [streamData, setStreamData] = useState("");
   }
 
   const subscribeBob = async () => {
-    const response = await clientBob.execute(Bob.address,
+    const response = await clientBob?.execute(Bob.address,
       contractAddress,
       {
         subscribe: {
