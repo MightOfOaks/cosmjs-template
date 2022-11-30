@@ -162,7 +162,7 @@ import {
         }
       }
       getContracts()
-    }, [clientTreasury])
+    }, [clientTreasury, contractAddress])
   
     setInterval(() => {
       const getHeight = async () => {
