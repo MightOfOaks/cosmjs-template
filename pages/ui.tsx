@@ -14,7 +14,7 @@ import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
 import { NextPage } from "next";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { InputDateTime } from "../components/InputDateTime";
-import {treasury, Rick, Alice, Bob} from '../Users'
+import {treasury, Rick, Alice, Bob} from '../users'
 import { Any } from "cosmjs-types/google/protobuf/any";
 import { time } from "console";
 
@@ -53,14 +53,16 @@ const [url, setUrl] = useState("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 const [inDenom, setInDenom] = useState("ujuno");
 const [outDenom, setOutDenom] = useState("uosmo");
 const [outSupply, setOutSupply] = useState("1000000");
+const [creationDenom, setCreationDenom] = useState("uosmo");
+const [creationFee, setCreationFee] = useState("1000000");
 const [startTime, setStartTime] = useState<Date | undefined>(undefined);
 const [endTime, setEndTime] = useState<Date | undefined>(undefined);
 const [contractAddress, setcontractAddress] = useState("wasm1sr06m8yqg0wzqqyqvzvp5t07dj4nevx9u8qc7j4qa72qu8e3ct8qzuktnp");
 //state definitions for InstantiationParams
-const [minStreamSeconds, setMinStreamSeconds] = useState("");
-const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("");
-const [streamCreationDenom, setStreamCreationDenom] = useState("");
-const [streamCreationFee, setStreamCreationFee] = useState("");
+const [minStreamSeconds, setMinStreamSeconds] = useState("60");
+const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
+const [streamCreationDenom, setStreamCreationDenom] = useState("uosmo");
+const [streamCreationFee, setStreamCreationFee] = useState("1000000");
 const [feeCollector, setFeeCollector] = useState(treasury.address);
 //state definitions for users positions
 const [contracts , setcontracts] = useState<readonly string[]>([]);
@@ -85,51 +87,62 @@ const [streamId , setStreamId] = useState(1);
 const [height , setHeight] = useState<any>();
 const [codeId , setCodeId] = useState(6);
 
+//subscribe parameters
+const [subscribeAmountBob , setSubscribeAmountBob] = useState("1000000");
+const [subscribeAmountAlice , setSubscribeAmountAlice] = useState("1000000");
+const [subscribeAmountRick , setSubscribeAmountRick] = useState("1000000");
+const [subscribeDenomBob , setSubscribeDenomBob] = useState("ujuno");
+const [subscribeDenomAlice , setSubscribeDenomAlice] = useState("ujuno");
+const [subscribeDenomRick , setSubscribeDenomRick] = useState("ujuno");
+
   
   const init = async () => {
     setSignerBob(await getSigner(Bob.mnemonic))
     setSignerAlice(await getSigner(Alice.mnemonic))
     setSignerRick(await getSigner(Rick.mnemonic))
     setSignerTreasury(await getSigner(treasury.mnemonic))
-
-  
-    
-    setClientBob(await SigningCosmWasmClient.connectWithSigner(
-    IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerBob as DirectSecp256k1HdWallet,
-    {
-      prefix: "wasm",
-      gasPrice: GasPrice.fromString("0.025uwasm"),
-    }
-  ))
-
-  setClientAlice(await SigningCosmWasmClient.connectWithSigner(
-    IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerAlice as DirectSecp256k1HdWallet,
-    {
-      prefix: "wasm",
-      gasPrice: GasPrice.fromString("0.025uwasm"),
-    }
-  ))
-
-  setClientRick(await SigningCosmWasmClient.connectWithSigner(
-    IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerRick as DirectSecp256k1HdWallet,
-    {
-      prefix: "wasm",
-      gasPrice: GasPrice.fromString("0.025uwasm"),
-    }
-  ))
-
-  setClientTreasury(await SigningCosmWasmClient.connectWithSigner(
-    IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    signerTreasury as DirectSecp256k1HdWallet,
-    {
-      prefix: "wasm",
-      gasPrice: GasPrice.fromString("0.025uwasm"),
-    }
-  ))
   }
+
+  useEffect(() => {
+    const setClients = async () => {
+    setClientBob(await SigningCosmWasmClient.connectWithSigner(
+      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+      signerBob as DirectSecp256k1HdWallet,
+      {
+        prefix: "wasm",
+        gasPrice: GasPrice.fromString("0.025uwasm"),
+      }
+    ))
+  
+    setClientAlice(await SigningCosmWasmClient.connectWithSigner(
+      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+      signerAlice as DirectSecp256k1HdWallet,
+      {
+        prefix: "wasm",
+        gasPrice: GasPrice.fromString("0.025uwasm"),
+      }
+    ))
+  
+    setClientRick(await SigningCosmWasmClient.connectWithSigner(
+      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+      signerRick as DirectSecp256k1HdWallet,
+      {
+        prefix: "wasm",
+        gasPrice: GasPrice.fromString("0.025uwasm"),
+      }
+    ))
+  
+    setClientTreasury(await SigningCosmWasmClient.connectWithSigner(
+      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+      signerTreasury as DirectSecp256k1HdWallet,
+      {
+        prefix: "wasm",
+        gasPrice: GasPrice.fromString("0.025uwasm"),
+      }
+    ))
+    }
+    setClients()
+  }, [signerAlice, signerBob, signerRick, signerTreasury])
   
 
   useEffect (() => {
@@ -141,12 +154,12 @@ const [codeId , setCodeId] = useState(6);
     //define async function
     const getContracts = async () => {
       if (clientTreasury) {
-      const streamContracts = await clientTreasury?.getContracts(6)
-      setcontracts(streamContracts)
-      const configRes= await clientTreasury?.queryContractRaw(contractAddress,toUtf8(Buffer.from(Buffer.from("config").toString("hex"),"hex").toString()))
-      let decodedRes = JSON.parse(new TextDecoder().decode(configRes as Uint8Array))
-      setConfigData((JSON.stringify(decodedRes, null, 2).trim()))
-    }
+        const streamContracts = await clientTreasury?.getContracts(6)
+        setcontracts(streamContracts)
+        const configRes= await clientTreasury?.queryContractRaw(contractAddress,toUtf8(Buffer.from(Buffer.from("config").toString("hex"),"hex").toString()))
+        let decodedRes = JSON.parse(new TextDecoder().decode(configRes as Uint8Array))
+        setConfigData((JSON.stringify(decodedRes, null, 2).trim()))
+      }
     }
     getContracts()
   }, [clientTreasury])
@@ -193,17 +206,18 @@ const [codeId , setCodeId] = useState(6);
               create_stream: {
                 treasury: treasury.address,
                 name: name,
-                url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                url: url,
                 in_denom: inDenom,
                 out_denom: outDenom, 
                 out_supply: outSupply,
-                start_time: (Number(startTime)*1000000).toString(),
-                end_time: (Number(endTime)*1000000).toString(),
+                start_time: (new Date(startTime as Date).getTime()*1000000).toString(),
+                end_time: (new Date(endTime as Date).getTime()*1000000).toString(),
               }
             },
             "auto",
             "Create Stream",
-            [coin(outSupply, "uosmo"),coin(streamCreationFee, "uosmo")]
+            //TODO: add creation fee
+            [coin(Number(outSupply), outDenom)]
           )
           console.log(executeResponse)
   }
@@ -237,9 +251,10 @@ const [codeId , setCodeId] = useState(6);
     const response = await clientBob?.queryContractSmart(
       contractAddress,
     {
-      position: { stream_id: 1, owner: Bob.address },
+      position: { stream_id: streamId, owner: Bob.address },
     })
     console.log(response)
+    setPositionBob(JSON.stringify(response,undefined,2).trim())
   }
 
   const subscribeBob = async () => {
@@ -247,25 +262,77 @@ const [codeId , setCodeId] = useState(6);
       contractAddress,
       {
         subscribe: {
-          stream_id: 1,
+          stream_id: streamId,
           position_owner: null,
           operator: null
         },
       },
       "auto",
+      "Subscribe Bob",
+      [coin(Number(subscribeAmountBob), subscribeDenomBob)]
     )
     console.log(response)
   }
 
+  const queryPositionAlice = async () => {
+    const response = await clientAlice?.queryContractSmart(
+      contractAddress,
+    {
+      position: { stream_id: streamId, owner: Alice.address },
+    })
+    console.log(response)
+    setPositionAlice(JSON.stringify(response,undefined,2).trim())
+  }
+
+  const subscribeAlice = async () => {
+    const response = await clientAlice?.execute(Alice.address,
+      contractAddress,
+      {
+        subscribe: {
+          stream_id: streamId,
+          position_owner: null,
+          operator: null
+        },
+      },
+      "auto",
+      "Subscribe Alice",
+      [coin(Number(subscribeAmountAlice), subscribeDenomAlice)]
+    )
+    console.log(response)
+  }
+
+  const queryPositionRick = async () => {
+    const response = await clientRick?.queryContractSmart(
+      contractAddress,
+    {
+      position: { stream_id: streamId, owner: Rick.address },
+    })
+    console.log(response)
+    setPositionRick(JSON.stringify(response,undefined,2).trim())
+  }
+
+  const subscribeRick = async () => {
+    const response = await clientRick?.execute(Rick.address,
+      contractAddress,
+      {
+        subscribe: {
+          stream_id: streamId,
+          position_owner: null,
+          operator: null
+        },
+      },
+      "auto",
+      "Subscribe Rick",
+      [coin(Number(subscribeAmountRick), subscribeDenomRick)]
+    )
+    console.log(response)
+  }
   const testStream = async () => {
     
     await new Promise(r => setTimeout(r, 5000));
     
   }
 
-
-
-    
 
 
   return (
@@ -285,33 +352,33 @@ const [codeId , setCodeId] = useState(6);
       <div className='top-0 absolute mt-1 '>
         {height}
         </div>
-      <div className='flex flex-row '>
-        <div className='flex flex-col'>
-        <span>Stream Instantiation Parameters</span>
-        
-        <label className='mt-2'>Code Id</label>
-        <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={codeId} onChange={e => setCodeId(Number(e.target.value))} />
-        <label className='mt-2'>Min Stream Seconds</label>
-        <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={minStreamSeconds} onChange={e => setMinStreamSeconds(e.target.value)} />
-        <label className='mt-2'>Min Seconds Until Start Time</label>
-        <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={minSecondsUntilStartTime} onChange={e => setMinSecondsUntilStartTime(e.target.value)} />
-        <label className='mt-2'>Stream Creation Denom</label>
-        <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamCreationDenom} onChange={e => setStreamCreationDenom(e.target.value)} />
-        <label className='mt-2'>Stream Creation Fee</label>
-        <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamCreationFee} onChange={e => setStreamCreationFee(e.target.value)} />
-        <label className='mt-2'>Fee Collector</label>
-        <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={feeCollector} onChange={e => setFeeCollector(e.target.value)} />
-          <button className='mt-2 border-4 border-black' onClick={instantiate}>Instantiate
-          </button>
-          <label className='mt-2'>Contracts instantiated with Code Id of {codeId}</label>
-          {contracts.map((contract, index) => (
-            <div key={index}>
-              <span>{contract}</span>
-            </div>
-          ))}
+      <div className='flex flex-row mb-4'>
+        <div className='w-1/3 flex flex-col'>
+          <span>Stream Instantiation Parameters</span>
+          
+          <label className='mt-2'>Code Id</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={codeId} onChange={e => setCodeId(Number(e.target.value))} />
+          <label className='mt-2'>Min Stream Seconds</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={minStreamSeconds} onChange={e => setMinStreamSeconds(e.target.value)} />
+          <label className='mt-2'>Min Seconds Until Start Time</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={minSecondsUntilStartTime} onChange={e => setMinSecondsUntilStartTime(e.target.value)} />
+          <label className='mt-2'>Stream Creation Denom</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamCreationDenom} onChange={e => setStreamCreationDenom(e.target.value)} />
+          <label className='mt-2'>Stream Creation Fee</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamCreationFee} onChange={e => setStreamCreationFee(e.target.value)} />
+          <label className='mt-2'>Fee Collector</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={feeCollector} onChange={e => setFeeCollector(e.target.value)} />
+            <button className='mt-2 border-4 border-black' onClick={instantiate}>Instantiate
+            </button>
+            <label className='mt-2'>Contracts instantiated with Code Id of {codeId}</label>
+            {contracts.map((contract, index) => (
+              <div key={index}>
+                <span className="text-xs">{contract}</span>
+              </div>
+            ))}
 
         </div>
-        <div className='flex flex-col ml-4'>
+        <div className='w-1/3 flex flex-col ml-4'>
           <span>Stream Creation Parameters</span>
           <label className="mt-2" > Contract adddress</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={contractAddress} onChange={e => setcontractAddress(e.target.value)} />
@@ -327,6 +394,10 @@ const [codeId , setCodeId] = useState(6);
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={outDenom} onChange={e => setOutDenom(e.target.value)} />
           <label className="mt-2">Out supply</label>
           <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={outSupply} onChange={e => setOutSupply(e.target.value)} />
+          <label className="mt-2">Creation Fee Denom</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={creationDenom} onChange={e => setCreationDenom(e.target.value)} />
+          <label className="mt-2">Creation Fee</label>
+          <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={creationFee} onChange={e => setCreationFee(e.target.value)} />
           <label className='mt-2'>Start Time</label>
           <div className="border-2 border-black mt-2">
             <InputDateTime minDate={new Date()} onChange={(date: SetStateAction<Date | undefined>) => setStartTime(date)} value={startTime} />
@@ -341,34 +412,79 @@ const [codeId , setCodeId] = useState(6);
 
 
         </div>
-        <div className="flex flex-row mx-5 mb-10 w-full">
-        {/* <input className='w-full h-full border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamData}/> */}
-        <div className="overflow-auto p-2 w-1/2 text-2xl text-orange-800 border-2 border-black h-full font-mono">
-          <pre>{streamData}</pre>
-        </div>
-         <div className="overflow-auto p-2 w-1/2 text-2xl text-blue-800 border-2 border-black h-full font-mono">
-          <pre>{configData}</pre>
-        </div>
+        <div className='flex flex-col ml-4 w-full'>
+          <div className="flex flex-row mx-5 mb-10 w-full">        
+            <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+              <pre>{streamData}</pre>
+            </div>
+            <div className="overflow-auto p-2 w-full text-2xl text-blue-800 border-2 border-black h-full font-mono">
+              <pre>{configData}</pre>
+            </div>
 
           </div>
-      </div>  
-         <div className="flex flex-row ml-">
-          <button className="w-[100px] border-2 rounded-sm" onClick={queryStream}>Query Stream</button>
-          <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
-          <label className='mx-4 mt-4'>Stream Id</label>
-          <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(e.target.value)}/>
+          <div className="flex flex-row ml-4">
+            <button className="w-[100px] border-2 rounded-sm" onClick={queryStream}>Query Stream</button>
+            <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
+            <label className='mx-4 mt-4'>Stream Id</label>
+            <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
          </div>
-     
-      <input type={'text'} defaultValue={JSON.stringify(Rick)} className='w-full h-48 border-2 border-black overflow-scroll overflow-x-auto'/>
-      <div className="flex flex-row mb-8">
-        <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionBob}>Query Bob's Position</button>
-        <button className="w-[100px] border-2 rounded-sm" onClick={subscribeBob}>Subscribe for Bob</button>
-        {/* <button title="Withdraw" onClick={withdrawBob}/>
-        <button title="Exit Stream" onClick={exitBob}/> */}
+         </div> 
+      </div>  
+      
+      <div className="w-full flex flex-row mx-4 mb-10">
+        <div className="w-full flex flex-col mr-2">
+            <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+              <pre>{positionBob}</pre>
+            </div>
+          <div className="flex flex-row">
+            <button className="w-[100px] border-2 rounded-sm" onClick={subscribeBob}>Subscribe for Bob</button>
+            <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionBob}>Query Bob's Position</button>
+            {/* <button title="Withdraw" onClick={withdrawBob}/>
+            <button title="Exit Stream" onClick={exitBob}/> */}
+          </div>
+          <div className="mt-2 flex flex-row">
+            <label className='mx-4 mt-4'>Subscription Denom</label>
+            <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomBob} onChange={e => setSubscribeDenomBob(e.target.value)}/>
+            <label className='mx-4 mt-4'>Subscription Amount</label>
+            <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountBob} onChange={e => setSubscribeAmountBob(e.target.value)}/>
+          </div>
+        </div>
+        <div className="w-full flex flex-col mr-2">
+          <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+              <pre>{positionAlice}</pre>
+          </div>
+          <div className="flex flex-row">
+            <button className="w-[100px] border-2 rounded-sm" onClick={subscribeAlice}>Subscribe for Alice</button>
+            <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionAlice}>Query Alice's Position</button>
+            {/* <button title="Withdraw" onClick={withdrawBob}/>
+            <button title="Exit Stream" onClick={exitBob}/> */}
+          </div>
+          <div className="mt-2 flex flex-row">
+            <label className='mx-4 mt-4'>Subscription Denom</label>
+            <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomAlice} onChange={e => setSubscribeDenomBob(e.target.value)}/>
+            <label className='mx-4 mt-4'>Subscription Amount</label>
+            <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountAlice} onChange={e => setSubscribeAmountBob(e.target.value)}/>
+          </div>
+        </div>
+        <div className="w-full flex flex-col mr-2">
+          <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+              <pre>{positionRick}</pre>
+          </div>
+          <div className="flex flex-row">
+            <button className="w-[100px] border-2 rounded-sm" onClick={subscribeRick}>Subscribe for Rick</button>
+            <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionRick}>Query Rick's Position</button>
+            {/* <button title="Withdraw" onClick={withdrawBob}/>
+            <button title="Exit Stream" onClick={exitBob}/> */}
+          </div>
+          <div className="mt-2 flex flex-row">
+            <label className='mx-4 mt-4'>Subscription Denom</label>
+            <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomRick} onChange={e => setSubscribeDenomBob(e.target.value)}/>
+            <label className='mx-4 mt-4'>Subscription Amount</label>
+            <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountRick} onChange={e => setSubscribeAmountBob(e.target.value)}/>
+          </div>
+        </div>
+        
       </div>
-      <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
-      <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
-      <input type={'text'} defaultValue="adssd" className='w-1/3 h-48 border-2 border-black'/>
 
     </div>
     </div>
