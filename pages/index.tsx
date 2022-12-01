@@ -292,6 +292,22 @@ import {
         )
         console.log(executeResponse) 
     }
+
+    const exitStreamBob = async () => {
+      const executeResponse = await clientBob?.execute(
+        Bob.address,
+        contractAddress,
+        {
+          exit_stream: {
+            stream_id: streamId,
+            position_owner: null
+          },
+        },
+        "auto",
+        "Exit Bob",
+      )
+      console.log(executeResponse) 
+    }
   
     const queryPositionAlice = async () => {
       const response = await clientAlice?.queryContractSmart(
@@ -336,6 +352,22 @@ import {
         )
         console.log(executeResponse) 
     }
+
+    const exitStreamAlice = async () => {
+      const executeResponse = await clientAlice?.execute(
+        Alice.address,
+        contractAddress,
+        {
+          exit_stream: {
+            stream_id: streamId,
+            position_owner: null
+          },
+        },
+        "auto",
+        "Exit Alice",
+      )
+      console.log(executeResponse) 
+    }
   
     const queryPositionRick = async () => {
       const response = await clientRick?.queryContractSmart(
@@ -379,6 +411,22 @@ import {
           "Withdraw Rick",
         )
         console.log(executeResponse) 
+    }
+   
+    const exitStreamRick = async () => {
+      const executeResponse = await clientRick?.execute(
+        Rick.address,
+        contractAddress,
+        {
+          exit_stream: {
+            stream_id: streamId,
+            position_owner: null
+          },
+        },
+        "auto",
+        "Exit Rick",
+      )
+      console.log(executeResponse) 
     }
 
     const testStream = async () => {
@@ -494,6 +542,7 @@ import {
               <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionBob}>Query Bob's Position</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={subscribeBob}>Subscribe for Bob</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={withdrawBob}>Withdraw for Bob</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={exitStreamBob}>Exit Stream for Bob</button>
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
@@ -512,6 +561,8 @@ import {
               <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionAlice}>Query Alice's Position</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={subscribeAlice}>Subscribe for Alice</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={withdrawAlice}>Withdraw for Alice</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={exitStreamAlice}>Exit Stream for Alice</button>
+
 
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
@@ -531,6 +582,8 @@ import {
               <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionRick}>Query Rick's Position</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={subscribeRick}>Subscribe for Rick</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={withdrawRick}>Withdraw for Rick</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={exitStreamRick}>Exit Stream for Rick</button>
+
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
