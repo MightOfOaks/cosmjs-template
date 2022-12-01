@@ -154,15 +154,17 @@ import {
       //define async function
       const getContracts = async () => {
         if (clientTreasury) {
-          const streamContracts = await clientTreasury?.getContracts(6)
-          setcontracts(streamContracts)
+          if(Number(codeId)){
+            const streamContracts = await clientTreasury?.getContracts(codeId)
+            setcontracts(streamContracts)
+          }
           const configRes= await clientTreasury?.queryContractRaw(contractAddress,toUtf8(Buffer.from(Buffer.from("config").toString("hex"),"hex").toString()))
           let decodedRes = JSON.parse(new TextDecoder().decode(configRes as Uint8Array))
           setConfigData((JSON.stringify(decodedRes, null, 2).trim()))
         }
       }
       getContracts()
-    }, [clientTreasury, contractAddress])
+    }, [clientTreasury, contractAddress, codeId])
   
     setInterval(() => {
       const getHeight = async () => {
