@@ -187,7 +187,7 @@ import {
       const file = new Blob(["Contract Config\n", configData, "\n\n", height, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
       element.download = "streamData.json";
-      document.body.appendChild(element); // Required for this to work in FireFox
+      document.body.appendChild(element);
       element.click();
     }
   
@@ -577,7 +577,7 @@ import {
         
         <div className="w-full flex flex-row mx-4 mb-10">
           <div className="w-full flex flex-col mr-2">
-              <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+              <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
                 <pre>{positionBob}</pre>
               </div>
             <div className="flex flex-row">
@@ -596,7 +596,7 @@ import {
             </div>
           </div>
           <div className="w-full flex flex-col mr-2">
-            <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+            <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
                 <pre>{positionAlice}</pre>
             </div>
             <div className="flex flex-row">
@@ -617,7 +617,7 @@ import {
             </div>
           </div>
           <div className="w-full flex flex-col mr-2">
-            <div className="overflow-auto p-2 w-full text-2xl text-orange-800 border-2 border-black h-full font-mono">
+            <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
                 <pre>{positionRick}</pre>
             </div>
             <div className="flex flex-row">
