@@ -470,7 +470,7 @@ import {
           </div>
         <div className='flex flex-row mb-4'>
           <div className='w-1/3 flex flex-col'>
-            <span>Stream Instantiation Parameters</span>
+            <span>Contract Instantiation Parameters</span>
             
             <label className='mt-2'>Code Id</label>
             <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={codeId} onChange={e => setCodeId(Number(e.target.value))} />
@@ -529,12 +529,18 @@ import {
   
           </div>
           <div className='flex flex-col ml-4 w-full'>
-            <div className="flex flex-row mx-5 mb-10 w-full">        
+            <div className="flex flex-row mx-5 mb-10 w-full">
+              <div className="flex flex-col w-full">
+              <label className='mb-2'>Stream Details</label>        
               <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
                 <pre>{streamData}</pre>
               </div>
+              </div>
+              <div className="flex flex-col w-full">
+              <label className='mb-2 ml-2'>Contract Config</label> 
               <div className="overflow-auto p-2 mx-2 w-full text-lg text-blue-800 border-2 border-black h-full font-mono">
                 <pre>{configData}</pre>
+              </div>
               </div>
   
             </div>
