@@ -14,7 +14,7 @@ import {
   import { NextPage } from "next";
   import { SetStateAction, useEffect, useRef, useState } from "react";
   import { InputDateTime } from "../components/InputDateTime";
-  import {treasury, Rick, Alice, Bob} from '../users'
+  import {treasury, Rick, Alice, Bob} from '../Users'
   import { Any } from "cosmjs-types/google/protobuf/any";
   import { time } from "console";
   
@@ -86,6 +86,7 @@ import {
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
   const [codeId , setCodeId] = useState(6);
+  const [treasuryBalance , setTreasuryBalance] = useState<any>();
   
   //subscribe parameters
   const [subscribeAmountBob , setSubscribeAmountBob] = useState("1000000");
@@ -161,6 +162,9 @@ import {
           const configRes= await clientTreasury?.queryContractRaw(contractAddress,toUtf8(Buffer.from(Buffer.from("config").toString("hex"),"hex").toString()))
           let decodedRes = JSON.parse(new TextDecoder().decode(configRes as Uint8Array))
           setConfigData((JSON.stringify(decodedRes, null, 2).trim()))
+          const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
+          const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
+          setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount}`)
         }
       }
       getContracts()
@@ -255,7 +259,7 @@ import {
         {
           finalize_stream: {
             stream_id: streamId,
-            position_owner: null
+            new_treasury: null
           },
         },
         "auto",
@@ -463,11 +467,15 @@ import {
           <span>Alice:{JSON.stringify(Alice)}</span>
           <br />
           <span>Rick:{JSON.stringify(Rick)}</span>
+          <br />
+          <label className='mx-2 font-bold'>Treasury Balance</label>
+          <span>{treasuryBalance}</span>
       </div>
       <div className='ml-8 mt-40  flex flex-col'>
         <div className='top-0 absolute mt-1 '>
           {height}
           </div>
+
         <div className='flex flex-row mb-4'>
           <div className='w-1/3 flex flex-col'>
             <span>Contract Instantiation Parameters</span>
