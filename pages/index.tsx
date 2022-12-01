@@ -275,6 +275,23 @@ import {
       )
       console.log(response)
     }
+
+    const withdrawBob = async () => {
+      const executeResponse = await clientBob?.execute(
+          Bob.address,
+          contractAddress,
+          {
+            withdraw: {
+              stream_id: streamId,
+              cap: null,
+              position_owner: null
+            },
+          },
+          "auto",
+          "Withdraw Bob",
+        )
+        console.log(executeResponse) 
+    }
   
     const queryPositionAlice = async () => {
       const response = await clientAlice?.queryContractSmart(
@@ -301,6 +318,23 @@ import {
         [coin(Number(subscribeAmountAlice), subscribeDenomAlice)]
       )
       console.log(response)
+    }
+
+    const withdrawAlice = async () => {
+      const executeResponse = await clientAlice?.execute(
+          Alice.address,
+          contractAddress,
+          {
+            withdraw: {
+              stream_id: streamId,
+              cap: null,
+              position_owner: null
+            },
+          },
+          "auto",
+          "Withdraw Alice",
+        )
+        console.log(executeResponse) 
     }
   
     const queryPositionRick = async () => {
@@ -329,6 +363,24 @@ import {
       )
       console.log(response)
     }
+
+    const withdrawRick = async () => {
+      const executeResponse = await clientRick?.execute(
+          Rick.address,
+          contractAddress,
+          {
+            withdraw: {
+              stream_id: streamId,
+              cap: null,
+              position_owner: null
+            },
+          },
+          "auto",
+          "Withdraw Rick",
+        )
+        console.log(executeResponse) 
+    }
+
     const testStream = async () => {
       
       await new Promise(r => setTimeout(r, 5000));
@@ -439,8 +491,9 @@ import {
                 <pre>{positionBob}</pre>
               </div>
             <div className="flex flex-row">
-              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeBob}>Subscribe for Bob</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionBob}>Query Bob's Position</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeBob}>Subscribe for Bob</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawBob}>Withdraw for Bob</button>
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
@@ -456,8 +509,10 @@ import {
                 <pre>{positionAlice}</pre>
             </div>
             <div className="flex flex-row">
-              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeAlice}>Subscribe for Alice</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionAlice}>Query Alice's Position</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeAlice}>Subscribe for Alice</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawAlice}>Withdraw for Alice</button>
+
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
@@ -473,8 +528,9 @@ import {
                 <pre>{positionRick}</pre>
             </div>
             <div className="flex flex-row">
-              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeRick}>Subscribe for Rick</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionRick}>Query Rick's Position</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeRick}>Subscribe for Rick</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawRick}>Withdraw for Rick</button>
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
