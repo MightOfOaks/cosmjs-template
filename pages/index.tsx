@@ -182,11 +182,11 @@ import {
       getHeight()  
     }, 10000)
 
-    const downloadStreamData = () => {
+    const downloadTestData = () => {
       const element = document.createElement("a");
       const file = new Blob(["Contract Config\n", configData, "\n\n", height, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
-      element.download = "streamData.json";
+      element.download = "testData.json";
       document.body.appendChild(element);
       element.click();
     }
@@ -570,7 +570,7 @@ import {
               <button className="w-[100px] border-2 rounded-sm" onClick={finalizeStream}>Finalize Stream</button>
               <label className='mx-4 mt-4'>Stream Id</label>
               <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
-              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadStreamData}>Download Test Data</button>
+              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadTestData}>Download Test Data</button>
            </div>
            </div> 
         </div>  
