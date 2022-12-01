@@ -248,6 +248,20 @@ import {
       console.log(response)
       setStreamData(JSON.stringify(response,undefined,2).trim())
     }
+    const finalizeStream = async () => {
+     const executeResponse = await clientTreasury?.execute(
+        treasury.address,
+        contractAddress,
+        {
+          finalize_stream: {
+            stream_id: streamId,
+            position_owner: null
+          },
+        },
+        "auto",
+      )
+      console.log(executeResponse) 
+    }
   
     const queryPositionBob = async () => {
       const response = await clientBob?.queryContractSmart(
@@ -527,6 +541,7 @@ import {
             <div className="flex flex-row ml-4">
               <button className="w-[100px] border-2 rounded-sm" onClick={queryStream}>Query Stream</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={finalizeStream}>Finalize Stream</button>
               <label className='mx-4 mt-4'>Stream Id</label>
               <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
            </div>
