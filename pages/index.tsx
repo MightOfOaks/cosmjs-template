@@ -14,7 +14,7 @@ import {
   import { NextPage } from "next";
   import { SetStateAction, useEffect, useRef, useState } from "react";
   import { InputDateTime } from "../components/InputDateTime";
-  import {treasury, Rick, Alice, Bob} from '../Users'
+  import {treasury, Rick, Alice, Bob} from '../users'
   import { Any } from "cosmjs-types/google/protobuf/any";
   import { time } from "console";
   
