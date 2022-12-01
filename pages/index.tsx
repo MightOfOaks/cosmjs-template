@@ -57,7 +57,7 @@ import {
   const [creationFee, setCreationFee] = useState("1000000");
   const [startTime, setStartTime] = useState<Date | undefined>(undefined);
   const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-  const [contractAddress, setcontractAddress] = useState("wasm1sr06m8yqg0wzqqyqvzvp5t07dj4nevx9u8qc7j4qa72qu8e3ct8qzuktnp");
+  const [contractAddress, setcontractAddress] = useState("wasm1nz0r0au8aj6dc00wmm3ufy4g4k86rjzlr8wkf92cktdlps5lgfcq23ect0");
   //state definitions for InstantiationParams
   const [minStreamSeconds, setMinStreamSeconds] = useState("60");
   const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
@@ -181,6 +181,15 @@ import {
       }
       getHeight()  
     }, 10000)
+
+    const downloadStreamData = () => {
+      const element = document.createElement("a");
+      const file = new Blob(["Contract Config\n", configData, "\n\n", height, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = "streamData.json";
+      document.body.appendChild(element); // Required for this to work in FireFox
+      element.click();
+    }
   
     const instantiate = async () => {
       const msg = {
@@ -229,6 +238,7 @@ import {
     }
   
     const updateDistribution = async () => {
+      console.log("Update Distribution Index")
       const response = await clientBob?.execute(Bob.address,
         contractAddress,
         {
@@ -253,6 +263,7 @@ import {
       setStreamData(JSON.stringify(response,undefined,2).trim())
     }
     const finalizeStream = async () => {
+      console.log(clientTreasury)
      const executeResponse = await clientTreasury?.execute(
         treasury.address,
         contractAddress,
@@ -398,6 +409,7 @@ import {
     }
   
     const subscribeRick = async () => {
+      console.log(clientRick)
       const response = await clientRick?.execute(Rick.address,
         contractAddress,
         {
@@ -558,6 +570,7 @@ import {
               <button className="w-[100px] border-2 rounded-sm" onClick={finalizeStream}>Finalize Stream</button>
               <label className='mx-4 mt-4'>Stream Id</label>
               <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
+              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadStreamData}>Download Test Data</button>
            </div>
            </div> 
         </div>  
