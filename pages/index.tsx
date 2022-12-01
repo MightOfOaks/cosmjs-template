@@ -85,7 +85,7 @@ import {
   //query params
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
-  const [codeId , setCodeId] = useState(6);
+  const [codeId , setCodeId] = useState(7);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
   
   //subscribe parameters
