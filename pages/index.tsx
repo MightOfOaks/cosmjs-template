@@ -87,6 +87,9 @@ import {
   const [height , setHeight] = useState<any>();
   const [codeId , setCodeId] = useState(7);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
+  const [bobBalance , setBobBalance] = useState<any>();
+  const [aliceBalance , setAliceBalance] = useState<any>();
+  const [rickBalance , setRickBalance] = useState<any>();
   
   //subscribe parameters
   const [subscribeAmountBob , setSubscribeAmountBob] = useState("1000000");
@@ -105,24 +108,59 @@ import {
     }
   
     useEffect(() => {
-      const setClients = async () => {
-      setClientBob(await SigningCosmWasmClient.connectWithSigner(
+      const setClientForTreasury = async () => {
+        if(signerTreasury){
+      await SigningCosmWasmClient.connectWithSigner(
         IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-        signerBob as DirectSecp256k1HdWallet,
+        signerTreasury as DirectSecp256k1HdWallet,
         {
           prefix: "wasm",
           gasPrice: GasPrice.fromString("0.025uwasm"),
         }
-      ))
-    
-      setClientAlice(await SigningCosmWasmClient.connectWithSigner(
-        IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-        signerAlice as DirectSecp256k1HdWallet,
-        {
-          prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
+      ).then((client) => {
+        setClientTreasury(client);
+      })
+      }
+    }
+      setClientForTreasury()
+    }, [signerTreasury])
+
+    useEffect(() => {
+      const setClientForBob = async () => {
+        if(signerBob){
+          await SigningCosmWasmClient.connectWithSigner(
+            IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+            signerBob as DirectSecp256k1HdWallet,
+            {
+              prefix: "wasm",
+              gasPrice: GasPrice.fromString("0.025uwasm"),
+            }
+          ).then((client) => {
+            setClientBob(client)
+          })
         }
-      ))
+      }
+      setClientForBob()
+    }, [signerBob])
+
+    useEffect(() => {
+      const setClientForAlice = async () => {
+        if(signerAlice){
+        setClientAlice(await SigningCosmWasmClient.connectWithSigner(
+            IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+            signerAlice as DirectSecp256k1HdWallet,
+            {
+              prefix: "wasm",
+              gasPrice: GasPrice.fromString("0.025uwasm"),
+            }
+          ))
+        }
+      }
+      setClientForAlice()
+    }, [signerAlice])
+    useEffect(() => {
+      const setClientForRick = async () => {
+        if(signerRick){
     
       setClientRick(await SigningCosmWasmClient.connectWithSigner(
         IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
@@ -133,17 +171,10 @@ import {
         }
       ))
     
-      setClientTreasury(await SigningCosmWasmClient.connectWithSigner(
-        IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-        signerTreasury as DirectSecp256k1HdWallet,
-        {
-          prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
         }
-      ))
       }
-      setClients()
-    }, [signerAlice, signerBob, signerRick, signerTreasury])
+      setClientForRick()
+    }, [signerRick])
     
   
     useEffect (() => {
@@ -169,6 +200,42 @@ import {
       }
       getContracts()
     }, [clientTreasury, contractAddress, codeId])
+
+    useEffect(() => {
+      const getBobBalance = async () => {
+        if(clientBob){
+          const bobJunoBal = await clientBob?.getBalance(Bob.address, "ujuno")
+          const bobOsmoBal = await clientBob?.getBalance(Bob.address, "uosmo")
+          setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)
+        }
+        return
+      }
+      getBobBalance()
+    }, [clientBob])
+
+    useEffect(() => {
+      const getAliceBalance = async () => {
+        if(clientAlice){
+          const aliceJunoBal = await clientAlice?.getBalance(Alice.address, "ujuno")
+          const aliceOsmoBal = await clientAlice?.getBalance(Alice.address, "uosmo")
+          setAliceBalance(`ujuno: ${aliceJunoBal?.amount} uosmo: ${aliceOsmoBal?.amount}`)
+          return
+        }
+      }
+      getAliceBalance()
+    }, [clientAlice])
+
+    useEffect(() => {
+      const getRickBalance = async () => {
+        if(clientRick){
+          const rickJunoBal = await clientRick?.getBalance(Rick.address, "ujuno")
+          const rickOsmoBal = await clientRick?.getBalance(Rick.address, "uosmo")
+          setRickBalance(`ujuno: ${rickJunoBal?.amount} uosmo: ${rickOsmoBal?.amount}`)
+          return
+        }
+      }
+      getRickBalance()
+    }, [clientRick])
   
     setInterval(() => {
       const getHeight = async () => {
@@ -182,9 +249,28 @@ import {
       getHeight()  
     }, 10000)
 
+    const updateBalances = async () => {
+      const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
+      const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
+      const bobJunoBal = await clientTreasury?.getBalance(Bob.address, "ujuno")
+      const aliceJunoBal = await clientTreasury?.getBalance(Alice.address, "ujuno")
+      const rickJunoBal = await clientTreasury?.getBalance(Rick.address, "ujuno")
+      const bobOsmoBal = await clientTreasury?.getBalance(Bob.address, "uosmo")
+      const aliceOsmoBal = await clientTreasury?.getBalance(Alice.address, "uosmo")
+      const rickOsmoBal = await clientTreasury?.getBalance(Rick.address, "uosmo")
+
+      setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount}`)
+      setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)
+      setAliceBalance(`ujuno: ${aliceJunoBal?.amount} uosmo: ${aliceOsmoBal?.amount}`)
+      setRickBalance(`ujuno: ${rickJunoBal?.amount} uosmo: ${rickOsmoBal?.amount}`)
+    }
+
+
     const downloadTestData = () => {
+      //append balances as string
+      let balances = `Treasury Balance: ${treasuryBalance} \nBob Balance: ${bobBalance} \nAlice Balance: ${aliceBalance} \nRick Balance: ${rickBalance}`
       const element = document.createElement("a");
-      const file = new Blob(["Contract Config\n", configData, "\n\n", height, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
+      const file = new Blob([balances, "\n\n", "Contract Config\n", configData, "\n\n", height, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
       element.download = "testData.json";
       document.body.appendChild(element);
@@ -482,6 +568,18 @@ import {
           <br />
           <label className='mx-2 font-bold'>Treasury Balance</label>
           <span>{treasuryBalance}</span>
+          <br />
+          <label className='mx-2 font-bold'>Bob's Balance</label>
+          <span>{bobBalance}</span>
+          <br />
+          <label className='mx-2 font-bold'>Alice's Balance</label>
+          <span>{aliceBalance}</span>
+          <br />
+          <label className='mx-2 font-bold'>Rick's Balance</label>
+          <span>{rickBalance}</span>
+          <br />
+          <button className='mx-2 border-2 mt-2 border-black' onClick={updateBalances}>Update Balances</button>
+
       </div>
       <div className='ml-8 mt-40  flex flex-col'>
         <div className='top-0 absolute mt-1 '>
@@ -571,6 +669,7 @@ import {
               <label className='mx-4 mt-4'>Stream Id</label>
               <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
               <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadTestData}>Download Test Data</button>
+              <span className="ml-4">(Downloads the test data currently displayed. The user is expected to update the data beforehand.)</span>
            </div>
            </div> 
         </div>  
