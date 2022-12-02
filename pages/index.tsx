@@ -598,6 +598,7 @@ import {
           <br />
           <span>Rick:{JSON.stringify(Rick)}</span>
           <br />
+          <hr className="my-2 w-3/4"/>
           <label className='mx-2 font-bold'>Treasury Balance</label>
           <span>{treasuryBalance}</span>
           <br />
@@ -613,7 +614,7 @@ import {
           <button className='mx-2 border-2 mt-2 border-black' onClick={updateBalances}>Update Balances</button>
 
       </div>
-      <div className='ml-8 mt-40  flex flex-col'>
+      <div className='ml-8 mt-20  flex flex-col'>
         <div className='top-0 absolute mt-1 '>
           {height}
           </div>
