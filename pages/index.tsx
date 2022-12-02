@@ -255,7 +255,7 @@ import {
       console.log("Updating balances")
       const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
       const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
-      const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
+      const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uwasm")
       const bobJunoBal = await clientTreasury?.getBalance(Bob.address, "ujuno")
       const aliceJunoBal = await clientTreasury?.getBalance(Alice.address, "ujuno")
       const rickJunoBal = await clientTreasury?.getBalance(Rick.address, "ujuno")
