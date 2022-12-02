@@ -57,7 +57,7 @@ import {
   const [creationFee, setCreationFee] = useState("1000000");
   const [startTime, setStartTime] = useState<Date | undefined>(undefined);
   const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-  const [contractAddress, setcontractAddress] = useState("wasm1nz0r0au8aj6dc00wmm3ufy4g4k86rjzlr8wkf92cktdlps5lgfcq23ect0");
+  const [contractAddress, setcontractAddress] = useState("wasm1808lz8dp2c39vhm9gnemt7zzj95nvrmjepxp7v3w4skzrlyzcmns25jpfs");
   //state definitions for InstantiationParams
   const [minStreamSeconds, setMinStreamSeconds] = useState("60");
   const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
@@ -85,11 +85,12 @@ import {
   //query params
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
-  const [codeId , setCodeId] = useState(7);
+  const [codeId , setCodeId] = useState(8);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
   const [bobBalance , setBobBalance] = useState<any>();
   const [aliceBalance , setAliceBalance] = useState<any>();
   const [rickBalance , setRickBalance] = useState<any>();
+  const [lastAction , setLastAction] = useState("");
   
   //subscribe parameters
   const [subscribeAmountBob , setSubscribeAmountBob] = useState("1000000");
@@ -250,6 +251,7 @@ import {
     }, 10000)
 
     const updateBalances = async () => {
+      console.log("Updating balances")
       const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
       const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
       const bobJunoBal = await clientTreasury?.getBalance(Bob.address, "ujuno")
@@ -270,7 +272,7 @@ import {
       //append balances as string
       let balances = `Treasury Balance: ${treasuryBalance} \nBob Balance: ${bobBalance} \nAlice Balance: ${aliceBalance} \nRick Balance: ${rickBalance}`
       const element = document.createElement("a");
-      const file = new Blob([balances, "\n\n", "Contract Config\n", configData, "\n\n", height, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
+      const file = new Blob([balances, "\n\n", "Contract Config\n", configData, "\n\n", height, "\n\nLast Action:\n", lastAction, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
       element.download = "testData.json";
       document.body.appendChild(element);
@@ -278,6 +280,7 @@ import {
     }
   
     const instantiate = async () => {
+      console.log("Instantiating a new contract")
       const msg = {
       min_stream_seconds: minStreamSeconds,
       min_seconds_until_start_time: minSecondsUntilStartTime,
@@ -299,7 +302,9 @@ import {
   
   
     const createStream = async () => {
+      console.log("Creating a new stream")
       console.log(clientTreasury)
+      setLastAction("Create New Stream")
       const executeResponse = await clientTreasury?.execute(
               treasury.address,
               contractAddress,
@@ -317,8 +322,7 @@ import {
               },
               "auto",
               "Create Stream",
-              //TODO: add creation fee
-              [coin(Number(outSupply), outDenom)]
+              [coin(Number(outSupply), outDenom), coin(Number(streamCreationFee), streamCreationDenom)]
             )
             console.log(executeResponse)
     }
@@ -338,6 +342,7 @@ import {
     }
   
     const queryStream = async () => {
+      console.log("Query Stream")
       console.log(contractAddress)
       console.log(clientTreasury)
       const response = await clientTreasury?.queryContractSmart(
@@ -349,7 +354,9 @@ import {
       setStreamData(JSON.stringify(response,undefined,2).trim())
     }
     const finalizeStream = async () => {
+      console.log("Finalize Stream")
       console.log(clientTreasury)
+      setLastAction("Finalize Stream")
      const executeResponse = await clientTreasury?.execute(
         treasury.address,
         contractAddress,
@@ -365,6 +372,7 @@ import {
     }
   
     const queryPositionBob = async () => {
+      console.log("Query Bob's Position")
       const response = await clientBob?.queryContractSmart(
         contractAddress,
       {
@@ -375,6 +383,8 @@ import {
     }
   
     const subscribeBob = async () => {
+      console.log("Subscribe Bob")
+      setLastAction("Subscribe Bob")
       const response = await clientBob?.execute(Bob.address,
         contractAddress,
         {
@@ -392,6 +402,8 @@ import {
     }
 
     const withdrawBob = async () => {
+      console.log("Withdraw Bob")
+      setLastAction("Withdraw Bob")
       const executeResponse = await clientBob?.execute(
           Bob.address,
           contractAddress,
@@ -409,6 +421,8 @@ import {
     }
 
     const exitStreamBob = async () => {
+      console.log("Exit Stream Bob")
+      setLastAction("Exit Stream Bob")
       const executeResponse = await clientBob?.execute(
         Bob.address,
         contractAddress,
@@ -425,6 +439,7 @@ import {
     }
   
     const queryPositionAlice = async () => {
+      console.log("Query Alice's Position")
       const response = await clientAlice?.queryContractSmart(
         contractAddress,
       {
@@ -435,6 +450,8 @@ import {
     }
   
     const subscribeAlice = async () => {
+      console.log("Subscribe Alice")
+      setLastAction("Subscribe Alice")
       const response = await clientAlice?.execute(Alice.address,
         contractAddress,
         {
@@ -452,6 +469,8 @@ import {
     }
 
     const withdrawAlice = async () => {
+      console.log("Withdraw Alice")
+      setLastAction("Withdraw Alice")
       const executeResponse = await clientAlice?.execute(
           Alice.address,
           contractAddress,
@@ -469,6 +488,8 @@ import {
     }
 
     const exitStreamAlice = async () => {
+      console.log("Exit Stream Alice")
+      setLastAction("Exit Stream Alice")
       const executeResponse = await clientAlice?.execute(
         Alice.address,
         contractAddress,
@@ -485,6 +506,7 @@ import {
     }
   
     const queryPositionRick = async () => {
+      console.log("Query Rick's Position")
       const response = await clientRick?.queryContractSmart(
         contractAddress,
       {
@@ -495,6 +517,8 @@ import {
     }
   
     const subscribeRick = async () => {
+      console.log("Subscribe Rick")
+      setLastAction("Subscribe Rick")
       console.log(clientRick)
       const response = await clientRick?.execute(Rick.address,
         contractAddress,
@@ -513,6 +537,8 @@ import {
     }
 
     const withdrawRick = async () => {
+      console.log("Withdraw Rick")
+      setLastAction("Withdraw Rick")
       const executeResponse = await clientRick?.execute(
           Rick.address,
           contractAddress,
@@ -530,6 +556,8 @@ import {
     }
    
     const exitStreamRick = async () => {
+      console.log("Exit Stream Rick")
+      setLastAction("Exit Stream Rick")
       const executeResponse = await clientRick?.execute(
         Rick.address,
         contractAddress,
@@ -710,9 +738,9 @@ import {
             </div>
             <div className="mt-2 flex flex-row">
               <label className='mx-4 mt-4'>Subscription Denom</label>
-              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomAlice} onChange={e => setSubscribeDenomBob(e.target.value)}/>
+              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomAlice} onChange={e => setSubscribeDenomAlice(e.target.value)}/>
               <label className='mx-4 mt-4'>Subscription Amount</label>
-              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountAlice} onChange={e => setSubscribeAmountBob(e.target.value)}/>
+              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountAlice} onChange={e => setSubscribeAmountAlice(e.target.value)}/>
             </div>
           </div>
           <div className="w-full flex flex-col mr-2">
@@ -730,9 +758,9 @@ import {
             </div>
             <div className="mt-2 flex flex-row">
               <label className='mx-4 mt-4'>Subscription Denom</label>
-              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomRick} onChange={e => setSubscribeDenomBob(e.target.value)}/>
+              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomRick} onChange={e => setSubscribeDenomRick(e.target.value)}/>
               <label className='mx-4 mt-4'>Subscription Amount</label>
-              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountRick} onChange={e => setSubscribeAmountBob(e.target.value)}/>
+              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountRick} onChange={e => setSubscribeAmountRick(e.target.value)}/>
             </div>
           </div>
           
