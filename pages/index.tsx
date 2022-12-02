@@ -53,16 +53,16 @@ import {
   const [inDenom, setInDenom] = useState("ujuno");
   const [outDenom, setOutDenom] = useState("uosmo");
   const [outSupply, setOutSupply] = useState("1000000");
-  const [creationDenom, setCreationDenom] = useState("uosmo");
-  const [creationFee, setCreationFee] = useState("1000000");
+  const [creationDenom, setCreationDenom] = useState("uwasm");
+  const [creationFee, setCreationFee] = useState("1000");
   const [startTime, setStartTime] = useState<Date | undefined>(undefined);
   const [endTime, setEndTime] = useState<Date | undefined>(undefined);
   const [contractAddress, setcontractAddress] = useState("wasm1808lz8dp2c39vhm9gnemt7zzj95nvrmjepxp7v3w4skzrlyzcmns25jpfs");
   //state definitions for InstantiationParams
   const [minStreamSeconds, setMinStreamSeconds] = useState("60");
   const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
-  const [streamCreationDenom, setStreamCreationDenom] = useState("uosmo");
-  const [streamCreationFee, setStreamCreationFee] = useState("1000000");
+  const [streamCreationDenom, setStreamCreationDenom] = useState("uwasm");
+  const [streamCreationFee, setStreamCreationFee] = useState("1000");
   const [feeCollector, setFeeCollector] = useState(treasury.address);
   //state definitions for users positions
   const [contracts , setcontracts] = useState<readonly string[]>([]);
@@ -196,7 +196,8 @@ import {
           setConfigData((JSON.stringify(decodedRes, null, 2).trim()))
           const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
           const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
-          setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount}`)
+          const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uwasm")
+          setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount} uwasm: ${uwasmBal?.amount}`)
         }
       }
       getContracts()
@@ -254,6 +255,7 @@ import {
       console.log("Updating balances")
       const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
       const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
+      const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
       const bobJunoBal = await clientTreasury?.getBalance(Bob.address, "ujuno")
       const aliceJunoBal = await clientTreasury?.getBalance(Alice.address, "ujuno")
       const rickJunoBal = await clientTreasury?.getBalance(Rick.address, "ujuno")
@@ -261,7 +263,7 @@ import {
       const aliceOsmoBal = await clientTreasury?.getBalance(Alice.address, "uosmo")
       const rickOsmoBal = await clientTreasury?.getBalance(Rick.address, "uosmo")
 
-      setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount}`)
+      setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount} uwasm: ${uwasmBal?.amount}`)
       setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)
       setAliceBalance(`ujuno: ${aliceJunoBal?.amount} uosmo: ${aliceOsmoBal?.amount}`)
       setRickBalance(`ujuno: ${rickJunoBal?.amount} uosmo: ${rickOsmoBal?.amount}`)
@@ -305,6 +307,8 @@ import {
       console.log("Creating a new stream")
       console.log(clientTreasury)
       setLastAction("Create New Stream")
+      console.log(creationDenom)
+      console.log(creationFee)
       const executeResponse = await clientTreasury?.execute(
               treasury.address,
               contractAddress,
