@@ -322,7 +322,7 @@ import {
               },
               "auto",
               "Create Stream",
-              [coin(Number(outSupply), outDenom), coin(Number(streamCreationFee), streamCreationDenom)]
+              [coin(Number(outSupply), outDenom), coin(Number(creationFee), creationDenom)]
             )
             console.log(executeResponse)
     }
