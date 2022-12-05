@@ -121,11 +121,13 @@ import { resolve } from "path";
         setSignerTreasury(signer)
         return client
         }).then(async (client) => {
-          setClientTreasury(client);
-          console.log("Treasury: ",client)
-          const bobJunoBal = await client.getBalance(Bob.address, "ujuno")
-          const bobOsmoBal = await client.getBalance(Bob.address, "uosmo")
-          setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)
+            setClientTreasury(client);
+            console.log("Treasury: ",client)
+            const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
+            const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
+            const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uwasm")
+            setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount} uwasm: ${uwasmBal?.amount}`)
+          
         });
 
         await DirectSecp256k1HdWallet.fromMnemonic(Bob.mnemonic, {
@@ -145,6 +147,9 @@ import { resolve } from "path";
           }).then(async (client) => {
             setClientBob(client);
             console.log("Bob: ", client)
+            const bobJunoBal = await client.getBalance(Bob.address, "ujuno")
+            const bobOsmoBal = await client.getBalance(Bob.address, "uosmo")
+            setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)   
           });
 
           await DirectSecp256k1HdWallet.fromMnemonic(Alice.mnemonic, {
@@ -198,7 +203,6 @@ import { resolve } from "path";
     }, [])
   
     useEffect(() => {
-      //define async function
       const getContracts = async () => {
         if (clientTreasury) {
           if(Number(codeId)){
@@ -207,11 +211,7 @@ import { resolve } from "path";
           }
           const configRes= await clientTreasury?.queryContractRaw(contractAddress,toUtf8(Buffer.from(Buffer.from("config").toString("hex"),"hex").toString()))
           let decodedRes = JSON.parse(new TextDecoder().decode(configRes as Uint8Array))
-          setConfigData((JSON.stringify(decodedRes, null, 2).trim()))
-          const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
-          const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
-          const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uwasm")
-          setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount} uwasm: ${uwasmBal?.amount}`)
+          setConfigData((JSON.stringify(decodedRes, null, 2).trim())) 
         }
       }
       getContracts()
