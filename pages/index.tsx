@@ -123,6 +123,9 @@ import { resolve } from "path";
         }).then(async (client) => {
           setClientTreasury(client);
           console.log("Treasury: ",client)
+          const bobJunoBal = await client.getBalance(Bob.address, "ujuno")
+          const bobOsmoBal = await client.getBalance(Bob.address, "uosmo")
+          setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)
         });
 
         await DirectSecp256k1HdWallet.fromMnemonic(Bob.mnemonic, {
@@ -161,6 +164,9 @@ import { resolve } from "path";
             }).then(async (client) => {
               setClientAlice(client);
               console.log("Alice: ", client)
+              const aliceJunoBal = await client.getBalance(Alice.address, "ujuno")
+              const aliceOsmoBal = await client.getBalance(Alice.address, "uosmo")
+              setAliceBalance(`ujuno: ${aliceJunoBal?.amount} uosmo: ${aliceOsmoBal?.amount}`)
             });
 
             await DirectSecp256k1HdWallet.fromMnemonic(Rick.mnemonic, {
@@ -180,10 +186,13 @@ import { resolve } from "path";
               }).then(async (client) => {
                 setClientRick(client);
                 console.log("Rick: ", client)
+                const rickJunoBal = await client.getBalance(Rick.address, "ujuno")
+                const rickOsmoBal = await client.getBalance(Rick.address, "uosmo")
+                setRickBalance(`ujuno: ${rickJunoBal?.amount} uosmo: ${rickOsmoBal?.amount}`)
               });
       
     }
-    
+
     useEffect (() => {
       init()
     }, [])
@@ -207,42 +216,6 @@ import { resolve } from "path";
       }
       getContracts()
     }, [clientTreasury, contractAddress, codeId])
-
-    useEffect(() => {
-      const getBobBalance = async () => {
-        if(clientBob){
-          const bobJunoBal = await clientBob?.getBalance(Bob.address, "ujuno")
-          const bobOsmoBal = await clientBob?.getBalance(Bob.address, "uosmo")
-          setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)
-        }
-        return
-      }
-      getBobBalance()
-    }, [clientBob])
-
-    useEffect(() => {
-      const getAliceBalance = async () => {
-        if(clientAlice){
-          const aliceJunoBal = await clientAlice?.getBalance(Alice.address, "ujuno")
-          const aliceOsmoBal = await clientAlice?.getBalance(Alice.address, "uosmo")
-          setAliceBalance(`ujuno: ${aliceJunoBal?.amount} uosmo: ${aliceOsmoBal?.amount}`)
-          return
-        }
-      }
-      getAliceBalance()
-    }, [clientAlice])
-
-    useEffect(() => {
-      const getRickBalance = async () => {
-        if(clientRick){
-          const rickJunoBal = await clientRick?.getBalance(Rick.address, "ujuno")
-          const rickOsmoBal = await clientRick?.getBalance(Rick.address, "uosmo")
-          setRickBalance(`ujuno: ${rickJunoBal?.amount} uosmo: ${rickOsmoBal?.amount}`)
-          return
-        }
-      }
-      getRickBalance()
-    }, [clientRick])
   
     setInterval(() => {
       const getHeight = async () => {
