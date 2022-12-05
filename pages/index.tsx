@@ -599,7 +599,7 @@ import { resolve } from "path";
       let address = (await signer.getAccounts())[0].address;
       return { client, address };
       }).then(async (result) => {
-        let waitTime = Math.floor(Math.random() * 900000) + 60000;
+        let waitTime = Math.floor(Math.random() * 120000) + 60000;
         let minutes = Math.floor(waitTime / 60000);
         let seconds = ((waitTime % 60000) / 1000).toFixed(0);
         let waitTimeFormatted = minutes + ":" + (Number(seconds) < 10 ? '0' : '') + seconds;
@@ -620,8 +620,54 @@ import { resolve } from "path";
             "auto",
             "Subscribe",
             [coin(Number(1000), inDenom)]
-          )
+          ).then((response) => {
           console.log(response)
+          }).catch((error) => {
+            console.log(error)
+          })
+          let remainingTime = 120000 - waitTime;
+          let waitTimeFromRemaining = Math.floor(Math.random() * remainingTime) + 60000;
+          let remainingMinutes = Math.floor(waitTimeFromRemaining / 60000);
+          let remainingSeconds = ((waitTimeFromRemaining % 60000) / 1000).toFixed(0);
+          let remainingTimeFormatted = remainingMinutes + ":" + (Number(remainingSeconds) < 10 ? '0' : '') + remainingSeconds;
+          console.log("Waiting " + remainingTimeFormatted + " before sending transaction")
+          setTimeout(async () => {
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random == 1) {
+              console.log("Sending transaction for Subscribe")
+              const res = await result.client.execute(
+              result.address,
+              contractAddress,
+              {
+                subscribe: {
+                  stream_id: streamId,
+                  position_owner: null,
+                  operator: null
+                },
+              },
+              "auto",
+              "Subscribe",
+              [coin(Number(1000), inDenom)]
+            )
+            console.log(res)}
+            else {
+              console.log("Sending transaction for Withdraw")
+              const res = await result.client.execute(
+                result.address,
+                contractAddress,
+                {
+                    withdraw: {
+                      stream_id: streamId,
+                      cap: null,
+                      position_owner: null
+                    },
+                },
+                "auto",
+                "Withdraw",
+              )
+              console.log(res)
+            }
+          }, remainingTime)        
         }, waitTime)
       })   
     )
