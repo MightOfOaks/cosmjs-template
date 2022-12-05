@@ -599,7 +599,7 @@ import { resolve } from "path";
       let address = (await signer.getAccounts())[0].address;
       return { client, address };
       }).then(async (result) => {
-        let waitTime = Math.floor(Math.random() * 120000) + 60000;
+        let waitTime = Math.floor(Math.random() * 540000) + 60000;
         let minutes = Math.floor(waitTime / 60000);
         let seconds = ((waitTime % 60000) / 1000).toFixed(0);
         let waitTimeFormatted = minutes + ":" + (Number(seconds) < 10 ? '0' : '') + seconds;
@@ -624,13 +624,13 @@ import { resolve } from "path";
           console.log(response)
           }).catch((error) => {
             console.log(error)
-          })
-          let remainingTime = 120000 - waitTime;
+          }).finally(() => {
+          let remainingTime = 540000 - waitTime;
           let waitTimeFromRemaining = Math.floor(Math.random() * remainingTime) + 60000;
           let remainingMinutes = Math.floor(waitTimeFromRemaining / 60000);
           let remainingSeconds = ((waitTimeFromRemaining % 60000) / 1000).toFixed(0);
           let remainingTimeFormatted = remainingMinutes + ":" + (Number(remainingSeconds) < 10 ? '0' : '') + remainingSeconds;
-          console.log("Waiting " + remainingTimeFormatted + " before sending transaction")
+          console.log("Waiting " + remainingTimeFormatted + " before sending the second transaction")
           setTimeout(async () => {
             let random = Math.floor(Math.random() * 2) + 1;
             if (random == 1) {
@@ -667,7 +667,8 @@ import { resolve } from "path";
               )
               console.log(res)
             }
-          }, remainingTime)        
+          }, waitTimeFromRemaining)  
+        })      
         }, waitTime)
       })   
     )
