@@ -61,7 +61,7 @@ import { resolve } from "path";
   const [creationFee, setCreationFee] = useState("1000");
   const [startTime, setStartTime] = useState<Date | undefined>(undefined);
   const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-  const [contractAddress, setcontractAddress] = useState("wasm1808lz8dp2c39vhm9gnemt7zzj95nvrmjepxp7v3w4skzrlyzcmns25jpfs");
+  const [contractAddress, setcontractAddress] = useState("wasm1x3960tw9cml6xsqtvzt4gmw3scauaxdd83rhs9dmlpjfjf9z9s7q7pmem3");
   //state definitions for InstantiationParams
   const [minStreamSeconds, setMinStreamSeconds] = useState("60");
   const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
@@ -89,13 +89,14 @@ import { resolve } from "path";
   //query params
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
-  const [codeId , setCodeId] = useState(8);
+  const [codeId , setCodeId] = useState(9);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
   const [bobBalance , setBobBalance] = useState<any>();
   const [aliceBalance , setAliceBalance] = useState<any>();
   const [rickBalance , setRickBalance] = useState<any>();
   const [lastAction , setLastAction] = useState("");
   const [testDuration , setTestDuration] = useState(30);
+  const [totalPurchased , setTotalPurchased] = useState(0);
   
   //subscribe parameters
   const [subscribeAmountBob , setSubscribeAmountBob] = useState("1000000");
@@ -314,7 +315,7 @@ import { resolve } from "path";
         contractAddress,
         {
           update_distribution: {
-            stream_id: 1,
+            stream_id: streamId,
           },
         },
         "auto",
@@ -646,7 +647,25 @@ import { resolve } from "path";
   }
 
   const queryTestStreamData = async () => {
-
+    new Promise((resolve, reject) => {
+    let total = 0;
+    addresses.map(async (address) => {
+      const response = await clientTreasury?.queryContractSmart(
+        contractAddress,
+      {
+        position: { stream_id: streamId, owner: address },
+      }).then((response) => {
+      total += Number(response.purchased)
+      console.log(response.purchased)
+      return response
+      }).catch((error) => {
+        console.log("Position not found")
+      }).finally(() => {
+        setTotalPurchased(total)
+      })
+    })
+    resolve(total)
+    })
   }
 
   
@@ -776,6 +795,10 @@ import { resolve } from "path";
                   <input className='w-24 h-12 ml-20 border-2 border-black' type="Number" value={testDuration} onChange={e => setTestDuration(Number(e.target.value))}/>
                 </div>
                 <button className="w-[100px] border-2 rounded-sm ml-2" onClick={testStream}>Test Stream</button>
+                <div className="flex flex-col ml-4">
+                  <button className="w-[100px] border-2 rounded-sm ml-2" onClick={queryTestStreamData}>Query Test Data</button>
+                  <span className="mt-2">Total Purchased: {totalPurchased}</span>
+                </div>
               </div>
            </div>
            </div> 
