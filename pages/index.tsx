@@ -95,6 +95,7 @@ import { resolve } from "path";
   const [aliceBalance , setAliceBalance] = useState<any>();
   const [rickBalance , setRickBalance] = useState<any>();
   const [lastAction , setLastAction] = useState("");
+  const [testDuration , setTestDuration] = useState(30);
   
   //subscribe parameters
   const [subscribeAmountBob , setSubscribeAmountBob] = useState("1000000");
@@ -123,11 +124,12 @@ import { resolve } from "path";
         }).then(async (client) => {
             setClientTreasury(client);
             console.log("Treasury: ",client)
-            const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
-            const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
-            const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uwasm")
+            const ujunoBal = await client.getBalance(treasury.address, "ujuno")
+            const uosmoBal = await client.getBalance(treasury.address, "uosmo")
+            const uwasmBal = await client.getBalance(treasury.address, "uwasm")
             setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount} uwasm: ${uwasmBal?.amount}`)
-          
+            const blockInfo = await client.getBlock()
+            setHeight(JSON.stringify({height: blockInfo?.header.height, time: new Date(blockInfo?.header.time).toLocaleString()},null,2).trim())      
         });
 
         await DirectSecp256k1HdWallet.fromMnemonic(Bob.mnemonic, {
@@ -217,17 +219,14 @@ import { resolve } from "path";
       getContracts()
     }, [clientTreasury, contractAddress, codeId])
   
-    setInterval(() => {
-      const getHeight = async () => {
-        if (clientTreasury) {
+    
+    const getHeight = async () => {
+      if (clientTreasury) {
         const blockInfo = await clientTreasury?.getBlock()
-        setHeight(JSON.stringify({height: blockInfo?.header.height
-        ,time: new Date(blockInfo?.header.time).toLocaleString()},null,2).trim())
-  
-        }
+        setHeight(JSON.stringify({height: blockInfo?.header.height,time: new Date(blockInfo?.header.time).toLocaleString()},null,2).trim())
       }
-      getHeight()  
-    }, 10000)
+    }
+    
 
     const updateBalances = async () => {
       console.log("Updating balances")
@@ -571,7 +570,7 @@ import { resolve } from "path";
       let address = (await signer.getAccounts())[0].address;
       return { client, address };
       }).then(async (result) => {
-        let waitTime = Math.floor(Math.random() * 540000) + 60000;
+        let waitTime = Math.floor(Math.random() * testDuration * 60000) + 10000;
         let minutes = Math.floor(waitTime / 60000);
         let seconds = ((waitTime % 60000) / 1000).toFixed(0);
         let waitTimeFormatted = minutes + ":" + (Number(seconds) < 10 ? '0' : '') + seconds;
@@ -597,8 +596,8 @@ import { resolve } from "path";
           }).catch((error) => {
             console.log(error)
           }).finally(() => {
-          let remainingTime = 540000 - waitTime;
-          let waitTimeFromRemaining = Math.floor(Math.random() * remainingTime) + 60000;
+          let remainingTime = testDuration * 60000 - waitTime;
+          let waitTimeFromRemaining = Math.floor(Math.random() * remainingTime) + 10000;
           let remainingMinutes = Math.floor(waitTimeFromRemaining / 60000);
           let remainingSeconds = ((waitTimeFromRemaining % 60000) / 1000).toFixed(0);
           let remainingTimeFormatted = remainingMinutes + ":" + (Number(remainingSeconds) < 10 ? '0' : '') + remainingSeconds;
@@ -678,6 +677,7 @@ import { resolve } from "path";
           <span>{rickBalance}</span>
           <br />
           <button className='mx-2 border-2 mt-2 border-black' onClick={updateBalances}>Update Balances</button>
+          <button className='mx-2 border-2 mt-2 border-black' onClick={getHeight}>Update Time</button>
 
       </div>
       <div className='ml-8 mt-20  flex flex-col'>
@@ -766,10 +766,17 @@ import { resolve } from "path";
               <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
               <button className="w-[100px] border-2 rounded-sm" onClick={finalizeStream}>Finalize Stream</button>
               <label className='mx-4 mt-4'>Stream Id</label>
-              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
+              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
               <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadTestData}>Download Test Data</button>
               <span className="ml-4">(Downloads the test data currently displayed. The user is expected to update the data beforehand.)</span>
-              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={testStream}>Test Stream</button>
+              
+              <div className="flex flex-row w-full ml-64">
+                <div className="flex flex-col ml-4">
+                  <label className=''>Test Duration in minutes</label>
+                  <input className='w-24 h-12 ml-20 border-2 border-black' type="Number" value={testDuration} onChange={e => setTestDuration(Number(e.target.value))}/>
+                </div>
+                <button className="w-[100px] border-2 rounded-sm ml-2" onClick={testStream}>Test Stream</button>
+              </div>
            </div>
            </div> 
         </div>  
