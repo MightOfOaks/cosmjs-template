@@ -20,6 +20,7 @@ import {
   import { Bip39, Random } from "@cosmjs/crypto";
   import { mnemonics } from "../users";
   import axios from "axios";
+import { resolve } from "path";
   
   interface InstantiationParams {
       min_stream_seconds: string,
@@ -109,83 +110,84 @@ import {
       setSignerAlice(await getSigner(Alice.mnemonic))
       setSignerRick(await getSigner(Rick.mnemonic))
       setSignerTreasury(await getSigner(treasury.mnemonic))
+      
     }
 
   
-    useEffect(() => {
-      const setClientForTreasury = async () => {
-        if(signerTreasury){
-      await SigningCosmWasmClient.connectWithSigner(
-        IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-        signerTreasury as DirectSecp256k1HdWallet,
-        {
-          prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
-        }
-      ).then((client) => {
-        setClientTreasury(client);
-      })
-      }
-    }
-      setClientForTreasury()
-    }, [signerTreasury])
+    // useEffect(() => {
+    //   const setClientForTreasury = async () => {
+    //     if(signerTreasury){
+    //   await SigningCosmWasmClient.connectWithSigner(
+    //     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+    //     signerTreasury as DirectSecp256k1HdWallet,
+    //     {
+    //       prefix: "wasm",
+    //       gasPrice: GasPrice.fromString("0.025uwasm"),
+    //     }
+    //   ).then((client) => {
+    //     setClientTreasury(client);
+    //   })
+    //   }
+    // }
+    //   setClientForTreasury()
+    // }, [signerTreasury])
 
-    useEffect(() => {
-      const setClientForBob = async () => {
-        if(signerBob){
-          await SigningCosmWasmClient.connectWithSigner(
-            IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-            signerBob as DirectSecp256k1HdWallet,
-            {
-              prefix: "wasm",
-              gasPrice: GasPrice.fromString("0.025uwasm"),
-            }
-          ).then((client) => {
-            setClientBob(client)
-          })
-        }
-      }
-      setClientForBob()
-    }, [signerBob])
+    // useEffect(() => {
+    //   const setClientForBob = async () => {
+    //     if(signerBob){
+    //       await SigningCosmWasmClient.connectWithSigner(
+    //         IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+    //         signerBob as DirectSecp256k1HdWallet,
+    //         {
+    //           prefix: "wasm",
+    //           gasPrice: GasPrice.fromString("0.025uwasm"),
+    //         }
+    //       ).then((client) => {
+    //         setClientBob(client)
+    //       })
+    //     }
+    //   }
+    //   setClientForBob()
+    // }, [signerBob])
 
-    useEffect(() => {
-      const setClientForAlice = async () => {
-        if(signerAlice){
-        setClientAlice(await SigningCosmWasmClient.connectWithSigner(
-            IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-            signerAlice as DirectSecp256k1HdWallet,
-            {
-              prefix: "wasm",
-              gasPrice: GasPrice.fromString("0.025uwasm"),
-            }
-          ))
-        }
-      }
-      setClientForAlice()
-    }, [signerAlice])
-    useEffect(() => {
-      const setClientForRick = async () => {
-        if(signerRick){
+    // useEffect(() => {
+    //   const setClientForAlice = async () => {
+    //     if(signerAlice){
+    //     setClientAlice(await SigningCosmWasmClient.connectWithSigner(
+    //         IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+    //         signerAlice as DirectSecp256k1HdWallet,
+    //         {
+    //           prefix: "wasm",
+    //           gasPrice: GasPrice.fromString("0.025uwasm"),
+    //         }
+    //       ))
+    //     }
+    //   }
+    //   setClientForAlice()
+    // }, [signerAlice])
+    // useEffect(() => {
+    //   const setClientForRick = async () => {
+    //     if(signerRick){
     
-      setClientRick(await SigningCosmWasmClient.connectWithSigner(
-        IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-        signerRick as DirectSecp256k1HdWallet,
-        {
-          prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
-        }
-      ))
+    //   setClientRick(await SigningCosmWasmClient.connectWithSigner(
+    //     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+    //     signerRick as DirectSecp256k1HdWallet,
+    //     {
+    //       prefix: "wasm",
+    //       gasPrice: GasPrice.fromString("0.025uwasm"),
+    //     }
+    //   ))
     
-        }
-      }
-      setClientForRick()
-    }, [signerRick])
+    //     }
+    //   }
+    //   setClientForRick()
+    // }, [signerRick])
     
   
-    useEffect (() => {
-      init()
-      console.log(clientTreasury)
-    }, [])
+    // useEffect (() => {
+    //   init()
+    //   console.log(clientTreasury)
+    // }, [])
   
     useEffect(() => {
       //define async function
@@ -582,14 +584,48 @@ import {
     }
 
     const testStream = async () => {
-    
-      
+    mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+      hdPaths: [makeCosmoshubPath(0)],
+      prefix: "wasm",
+    }).then(async (signer) => { 
+      let client = await SigningCosmWasmClient.connectWithSigner(
+      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+        signer,
+        {
+          prefix: "wasm",
+          gasPrice: GasPrice.fromString("0.025uwasm"),
+        }
+      );
+      let address = (await signer.getAccounts())[0].address;
+      return { client, address };
+      }).then(async (result) => {
+        let waitTime = Math.floor(Math.random() * 900000) + 60000;
+        let minutes = Math.floor(waitTime / 60000);
+        let seconds = ((waitTime % 60000) / 1000).toFixed(0);
+        let waitTimeFormatted = minutes + ":" + (Number(seconds) < 10 ? '0' : '') + seconds;
+        console.log("Waiting " + waitTimeFormatted + " before sending transaction")
 
-     
-      
-    }
-  
-  
+        setTimeout(async () => {
+          console.log("Sending transaction")
+          const response = await result.client.execute(
+            result.address,
+            contractAddress,
+            {
+              subscribe: {
+                stream_id: streamId,
+                position_owner: null,
+                operator: null
+              },
+            },
+            "auto",
+            "Subscribe",
+            [coin(Number(1000), inDenom)]
+          )
+          console.log(response)
+        }, waitTime)
+      })   
+    )
+  }
   
     return (
     <div className="mx-8"> 
@@ -709,6 +745,7 @@ import {
               <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
               <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadTestData}>Download Test Data</button>
               <span className="ml-4">(Downloads the test data currently displayed. The user is expected to update the data beforehand.)</span>
+              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={testStream}>Test Stream</button>
            </div>
            </div> 
         </div>  
