@@ -106,88 +106,87 @@ import { resolve } from "path";
   
     
     const init = async () => {
-      setSignerBob(await getSigner(Bob.mnemonic))
-      setSignerAlice(await getSigner(Alice.mnemonic))
-      setSignerRick(await getSigner(Rick.mnemonic))
-      setSignerTreasury(await getSigner(treasury.mnemonic))
+      await DirectSecp256k1HdWallet.fromMnemonic(treasury.mnemonic, {
+        hdPaths: [makeCosmoshubPath(0)],
+        prefix: "wasm",
+      }).then(async (signer) => { 
+        let client = await SigningCosmWasmClient.connectWithSigner(
+        IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+          signer,
+          {
+            prefix: "wasm",
+            gasPrice: GasPrice.fromString("0.025uwasm"),
+          }
+        );
+        setSignerTreasury(signer)
+        return client
+        }).then(async (client) => {
+          setClientTreasury(client);
+          console.log("Treasury: ",client)
+        });
+
+        await DirectSecp256k1HdWallet.fromMnemonic(Bob.mnemonic, {
+          hdPaths: [makeCosmoshubPath(0)],
+          prefix: "wasm",
+        }).then(async (signer) => { 
+          let client = await SigningCosmWasmClient.connectWithSigner(
+          IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+            signer,
+            {
+              prefix: "wasm",
+              gasPrice: GasPrice.fromString("0.025uwasm"),
+            }
+          );
+          setSignerBob(signer)
+          return client
+          }).then(async (client) => {
+            setClientBob(client);
+            console.log("Bob: ", client)
+          });
+
+          await DirectSecp256k1HdWallet.fromMnemonic(Alice.mnemonic, {
+            hdPaths: [makeCosmoshubPath(0)],
+            prefix: "wasm",
+          }).then(async (signer) => { 
+            let client = await SigningCosmWasmClient.connectWithSigner(
+            IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+              signer,
+              {
+                prefix: "wasm",
+                gasPrice: GasPrice.fromString("0.025uwasm"),
+              }
+            );
+            setSignerAlice(signer)
+            return client
+            }).then(async (client) => {
+              setClientAlice(client);
+              console.log("Alice: ", client)
+            });
+
+            await DirectSecp256k1HdWallet.fromMnemonic(Rick.mnemonic, {
+              hdPaths: [makeCosmoshubPath(0)],
+              prefix: "wasm",
+            }).then(async (signer) => { 
+              let client = await SigningCosmWasmClient.connectWithSigner(
+              IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+                signer,
+                {
+                  prefix: "wasm",
+                  gasPrice: GasPrice.fromString("0.025uwasm"),
+                }
+              );
+              setSignerRick(signer)
+              return client
+              }).then(async (client) => {
+                setClientRick(client);
+                console.log("Rick: ", client)
+              });
       
     }
-
-  
-    // useEffect(() => {
-    //   const setClientForTreasury = async () => {
-    //     if(signerTreasury){
-    //   await SigningCosmWasmClient.connectWithSigner(
-    //     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    //     signerTreasury as DirectSecp256k1HdWallet,
-    //     {
-    //       prefix: "wasm",
-    //       gasPrice: GasPrice.fromString("0.025uwasm"),
-    //     }
-    //   ).then((client) => {
-    //     setClientTreasury(client);
-    //   })
-    //   }
-    // }
-    //   setClientForTreasury()
-    // }, [signerTreasury])
-
-    // useEffect(() => {
-    //   const setClientForBob = async () => {
-    //     if(signerBob){
-    //       await SigningCosmWasmClient.connectWithSigner(
-    //         IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    //         signerBob as DirectSecp256k1HdWallet,
-    //         {
-    //           prefix: "wasm",
-    //           gasPrice: GasPrice.fromString("0.025uwasm"),
-    //         }
-    //       ).then((client) => {
-    //         setClientBob(client)
-    //       })
-    //     }
-    //   }
-    //   setClientForBob()
-    // }, [signerBob])
-
-    // useEffect(() => {
-    //   const setClientForAlice = async () => {
-    //     if(signerAlice){
-    //     setClientAlice(await SigningCosmWasmClient.connectWithSigner(
-    //         IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    //         signerAlice as DirectSecp256k1HdWallet,
-    //         {
-    //           prefix: "wasm",
-    //           gasPrice: GasPrice.fromString("0.025uwasm"),
-    //         }
-    //       ))
-    //     }
-    //   }
-    //   setClientForAlice()
-    // }, [signerAlice])
-    // useEffect(() => {
-    //   const setClientForRick = async () => {
-    //     if(signerRick){
     
-    //   setClientRick(await SigningCosmWasmClient.connectWithSigner(
-    //     IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-    //     signerRick as DirectSecp256k1HdWallet,
-    //     {
-    //       prefix: "wasm",
-    //       gasPrice: GasPrice.fromString("0.025uwasm"),
-    //     }
-    //   ))
-    
-    //     }
-    //   }
-    //   setClientForRick()
-    // }, [signerRick])
-    
-  
-    // useEffect (() => {
-    //   init()
-    //   console.log(clientTreasury)
-    // }, [])
+    useEffect (() => {
+      init()
+    }, [])
   
     useEffect(() => {
       //define async function
@@ -673,6 +672,11 @@ import { resolve } from "path";
       })   
     )
   }
+
+  const queryTestStreamData = async () => {
+
+  }
+
   
     return (
     <div className="mx-8"> 
