@@ -8,15 +8,18 @@ import {
   import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
   import { toUtf8 } from "@cosmjs/encoding";
   import { getSigner } from "../wallet";
-  import { coin } from "@cosmjs/amino";
+  import { coin, makeCosmoshubPath, Secp256k1HdWallet } from "@cosmjs/amino";
   import { Timestamp } from "cosmjs-types/google/protobuf/timestamp";
   import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
   import { NextPage } from "next";
   import { SetStateAction, useEffect, useRef, useState } from "react";
   import { InputDateTime } from "../components/InputDateTime";
-  import {treasury, Rick, Alice, Bob} from '../users'
+  import {treasury, Rick, Alice, Bob, addresses} from '../users'
   import { Any } from "cosmjs-types/google/protobuf/any";
   import { time } from "console";
+  import { Bip39, Random } from "@cosmjs/crypto";
+  import { mnemonics } from "../users";
+  import axios from "axios";
   
   interface InstantiationParams {
       min_stream_seconds: string,
@@ -107,6 +110,7 @@ import {
       setSignerRick(await getSigner(Rick.mnemonic))
       setSignerTreasury(await getSigner(treasury.mnemonic))
     }
+
   
     useEffect(() => {
       const setClientForTreasury = async () => {
@@ -578,8 +582,10 @@ import {
     }
 
     const testStream = async () => {
+    
       
-      await new Promise(r => setTimeout(r, 5000));
+
+     
       
     }
   

@@ -17,6 +17,7 @@
     "react-dom": "18.2.0",
     "typescript": "4.9.3",
     "@cosmjs/amino": "^0.27.0",
+    "@cosmjs/crypto": "0.29.4",
     "@cosmjs/cosmwasm-stargate": "^0.27.0",
     "@cosmjs/encoding": "^0.27.0",
     "@cosmjs/ledger-amino": "^0.27.0",
@@ -26,7 +27,8 @@
     "cosmjs-types": "^0.4.1",
     "react-datetime-picker": "^3",
     "react-icons": "^4.3.1",
-    "clsx": "^1"
+    "clsx": "^1",
+    "axios":"1.2.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
