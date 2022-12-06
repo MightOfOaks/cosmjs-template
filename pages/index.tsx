@@ -823,10 +823,10 @@ import { resolve } from "path";
               <button className="w-[100px] border-2 rounded-sm" onClick={finalizeStream}>Finalize Stream</button>
               <label className='mx-4 mt-4'>Stream Id</label>
               <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
-              <button className="w-[100px] border-2 rounded-sm ml-32" onClick={downloadTestData}>Download Test Data</button>
+              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadTestData}>Download Test Data</button>
               <span className="ml-4">(Downloads the test data currently displayed. The user is expected to update the data beforehand.)</span>
               
-              <div className="flex flex-row w-full ml-64">
+              <div className="flex flex-row w-full ml-32">
                 <div className="flex flex-col ml-4">
                   <label className=''>Test Duration in minutes</label>
                   <input className='w-24 h-12 ml-20 border-2 border-black' type="Number" value={testDuration} onChange={e => setTestDuration(Number(e.target.value))}/>
