@@ -646,6 +646,43 @@ import { resolve } from "path";
     )
   }
 
+  const updateTestPositions = async () => {
+    mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+      hdPaths: [makeCosmoshubPath(0)],
+      prefix: "wasm",
+    }).then(async (signer) => { 
+      let client = await SigningCosmWasmClient.connectWithSigner(
+      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+        signer,
+        {
+          prefix: "wasm",
+          gasPrice: GasPrice.fromString("0.025uwasm"),
+        }
+      );
+      let address = (await signer.getAccounts())[0].address;
+      return { client, address };
+      }).then(async (result) => {
+          console.log("Updating position for " + result.address)
+          const response = await result.client.execute(
+            result.address,
+            contractAddress,
+            {
+              update_position: {
+                stream_id: streamId,
+                position_owner: null,
+              },
+            },
+            "auto",
+            "Update Position",
+          ).then((response) => {
+          console.log(response)
+          }).catch((error) => {
+            console.log(error)
+          })      
+      })   
+    )
+  }
+
   const queryTestStreamData = async () => {
     new Promise((resolve, reject) => {
     let total = 0;
@@ -786,7 +823,7 @@ import { resolve } from "path";
               <button className="w-[100px] border-2 rounded-sm" onClick={finalizeStream}>Finalize Stream</button>
               <label className='mx-4 mt-4'>Stream Id</label>
               <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
-              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadTestData}>Download Test Data</button>
+              <button className="w-[100px] border-2 rounded-sm ml-32" onClick={downloadTestData}>Download Test Data</button>
               <span className="ml-4">(Downloads the test data currently displayed. The user is expected to update the data beforehand.)</span>
               
               <div className="flex flex-row w-full ml-64">
@@ -795,6 +832,7 @@ import { resolve } from "path";
                   <input className='w-24 h-12 ml-20 border-2 border-black' type="Number" value={testDuration} onChange={e => setTestDuration(Number(e.target.value))}/>
                 </div>
                 <button className="w-[100px] border-2 rounded-sm ml-2" onClick={testStream}>Test Stream</button>
+                <button className="w-[100px] border-2 rounded-sm ml-2" onClick={updateTestPositions}>Update Test Positions</button>
                 <div className="flex flex-col ml-4">
                   <button className="w-[100px] border-2 rounded-sm ml-2" onClick={queryTestStreamData}>Query Test Data</button>
                   <span className="mt-2">Total Purchased: {totalPurchased}</span>
