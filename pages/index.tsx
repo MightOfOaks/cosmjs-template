@@ -61,7 +61,7 @@ import { resolve } from "path";
   const [creationFee, setCreationFee] = useState("1000");
   const [startTime, setStartTime] = useState<Date | undefined>(undefined);
   const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-  const [contractAddress, setcontractAddress] = useState("wasm1x3960tw9cml6xsqtvzt4gmw3scauaxdd83rhs9dmlpjfjf9z9s7q7pmem3");
+  const [contractAddress, setcontractAddress] = useState("wasm1nzft0f2g3pcx3yuxj0yympueyne3f6mrz3jsfwap777j2lmphlvqccxfr4");
   //state definitions for InstantiationParams
   const [minStreamSeconds, setMinStreamSeconds] = useState("60");
   const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
@@ -89,7 +89,7 @@ import { resolve } from "path";
   //query params
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
-  const [codeId , setCodeId] = useState(9);
+  const [codeId , setCodeId] = useState(10);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
   const [bobBalance , setBobBalance] = useState<any>();
   const [aliceBalance , setAliceBalance] = useState<any>();
