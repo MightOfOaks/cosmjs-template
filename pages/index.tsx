@@ -2,13 +2,13 @@ import {
   CosmWasmClient,
     SigningCosmWasmClient,
   } from "@cosmjs/cosmwasm-stargate";
-  import { GasPrice } from "@cosmjs/stargate";
+  import { DeliverTxResponse, GasPrice, isDeliverTxFailure, SigningStargateClient } from "@cosmjs/stargate";
   import { DirectSecp256k1HdWallet, EncodeObject } from "@cosmjs/proto-signing";
   import { LedgerSigner } from "@cosmjs/ledger-amino";
   import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
   import { toUtf8 } from "@cosmjs/encoding";
   import { getSigner } from "../wallet";
-  import { coin, makeCosmoshubPath, Secp256k1HdWallet } from "@cosmjs/amino";
+  import { coin, coins, makeCosmoshubPath, Secp256k1HdWallet } from "@cosmjs/amino";
   import { Timestamp } from "cosmjs-types/google/protobuf/timestamp";
   import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
   import { NextPage } from "next";
@@ -18,9 +18,12 @@ import {
   import { Any } from "cosmjs-types/google/protobuf/any";
   import { time } from "console";
   import { Bip39, Random } from "@cosmjs/crypto";
-  import { mnemonics } from "../users";
+  import { mnemonics as oldMnemonics } from "../users";
   import axios from "axios";
-import { resolve } from "path";
+  import { resolve } from "path";
+  import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+  import {walletAddresses} from '../accounts'
+  import { mnemonics } from "../accounts";
   
   interface InstantiationParams {
       min_stream_seconds: string,
@@ -555,8 +558,140 @@ import { resolve } from "path";
       console.log(executeResponse) 
     }
 
+    const generateAddresses = async () => {
+      let mnemonics = []
+      let addresses: string[] = []
+      for (let i = 0; i < 5000; i++) {
+        const mnemonic = Bip39.encode(Random.getBytes(16)).toString()
+        mnemonics.push(mnemonic)
+        await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+          hdPaths: [makeCosmoshubPath(0)],
+          prefix: "wasm",
+        }).then(async (signer) => {
+          let address = (await signer.getAccounts())[0].address
+          addresses.push(address)
+        })
+      }
+      console.log(mnemonics)
+      console.log(addresses)
+      // download as json
+      const dataStr =
+        "data:text/json;charset=utf-8," +
+        encodeURIComponent(
+          JSON.stringify(
+            {
+              mnemonics: mnemonics,
+              addresses: addresses,
+            },
+            undefined,
+            2
+          )
+        )
+      const downloadAnchorNode = document.createElement("a")
+      downloadAnchorNode.setAttribute("href", dataStr)
+      downloadAnchorNode.setAttribute("download", "addresses.json")
+      document.body.appendChild(downloadAnchorNode) // required for firefox
+      downloadAnchorNode.click()
+      downloadAnchorNode.remove()
+    }
+
+    const sendTokens = async () => { 
+      //purchased: 113424.507486238522866401
+      //wasm1wxx0z04gkw29dwcnj34mjw367vh0plpvfjgkhn
+      //balance before exit: 10000000
+      // const response = await clientTreasury?.queryContractSmart(
+      //   contractAddress,
+      // {
+      //   position: { stream_id: streamId, owner: "wasm1wxx0z04gkw29dwcnj34mjw367vh0plpvfjgkhn" },
+      // }).then((response) => {
+      // console.log(response.purchased)})
+      await DirectSecp256k1HdWallet.fromMnemonic("crater derive purpose wolf fade smoke auto art cancel surround flavor quarter", {
+        hdPaths: [makeCosmoshubPath(0)],
+        prefix: "wasm",
+      }).then(async (signer) => { 
+        let client = await SigningCosmWasmClient.connectWithSigner(
+        IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+          signer,
+          {
+            prefix: "wasm",
+            gasPrice: GasPrice.fromString("0.025uwasm"),
+          }
+        );
+        setSignerTreasury(signer)
+        return client
+        }).then(async (client) => {
+          const executeResponse = await client.execute(
+            "wasm1wxx0z04gkw29dwcnj34mjw367vh0plpvfjgkhn",
+            contractAddress,
+            {
+              exit_stream: {
+                stream_id: streamId,
+                position_owner: null
+              },
+            },
+            "auto",
+            "Exit",
+          )
+          console.log(executeResponse) 
+        })
+
+
+
+
+
+
+      // console.log("Sending Tokens to address: ", walletAddresses[1])
+      // let result = await clientTreasury?.signAndBroadcast("wasm15nrpfjj85qm9l2qsc0d67qxq7w5p0h8p9pkypj", 
+      //   [
+      //     {
+      //       typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+      //       value: {
+      //         fromAddress: treasury.address,
+      //         toAddress: walletAddresses[1],
+      //         amount: coins(15072.779870462679046742, "uosmo"),
+      //       },
+      //     }
+      //   ]
+      // ,
+      // "auto",
+      // "Send Tokens",
+      // )
+      // console.log(result)
+      
+
+
+      // let msgArray: EncodeObject[] = []
+      // for (let i = 0; i < 1000; i++) {
+      //   console.log("Sending Tokens to address: " + i) 
+      //   msgArray.push({
+      //     typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+      //     value: {
+      //       fromAddress: treasury.address,
+      //       toAddress: walletAddresses[i],
+      //       amount: coins(10000000, "uwasm"),
+      //     },
+      //   })
+      // }
+      //   let result = await clientTreasury?.signAndBroadcast("wasm15nrpfjj85qm9l2qsc0d67qxq7w5p0h8p9pkypj", 
+      //     msgArray
+      //   ,
+      //   "auto",
+      //   "Send Tokens",
+      //   )
+      //   console.log(result)
+        
+    }
+
+
+   
+
+    
+
     const testStream = async () => {
-    mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+    mnemonics.map(async (mnemonic, index) => 
+    
+    setTimeout(async () => {
+    await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       hdPaths: [makeCosmoshubPath(0)],
       prefix: "wasm",
     }).then(async (signer) => { 
@@ -571,7 +706,7 @@ import { resolve } from "path";
       let address = (await signer.getAccounts())[0].address;
       return { client, address };
       }).then(async (result) => {
-        let waitTime = Math.floor(Math.random() * testDuration * 60000) + 10000;
+        let waitTime = Math.floor(Math.random() * testDuration * 60000) + 10000 - index*300;
         let minutes = Math.floor(waitTime / 60000);
         let seconds = ((waitTime % 60000) / 1000).toFixed(0);
         let waitTimeFormatted = minutes + ":" + (Number(seconds) < 10 ? '0' : '') + seconds;
@@ -597,7 +732,7 @@ import { resolve } from "path";
           }).catch((error) => {
             console.log(error)
           }).finally(() => {
-          let remainingTime = testDuration * 60000 - waitTime;
+          let remainingTime = testDuration * 60000 - waitTime - index*300;
           let waitTimeFromRemaining = Math.floor(Math.random() * remainingTime) + 10000;
           let remainingMinutes = Math.floor(waitTimeFromRemaining / 60000);
           let remainingSeconds = ((waitTimeFromRemaining % 60000) / 1000).toFixed(0);
@@ -642,51 +777,64 @@ import { resolve } from "path";
           }, waitTimeFromRemaining)  
         })      
         }, waitTime)
-      })   
+      })  
+    }, index * 300) 
     )
   }
 
   const updateTestPositions = async () => {
-    mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
-      hdPaths: [makeCosmoshubPath(0)],
-      prefix: "wasm",
-    }).then(async (signer) => { 
-      let client = await SigningCosmWasmClient.connectWithSigner(
-      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
-        signer,
-        {
+     mnemonics.map(async (mnemonic, index) => 
+     setTimeout(async () => {
+        await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+          hdPaths: [makeCosmoshubPath(0)],
           prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
-        }
-      );
-      let address = (await signer.getAccounts())[0].address;
-      return { client, address };
-      }).then(async (result) => {
-          console.log("Updating position for " + result.address)
-          const response = await result.client.execute(
-            result.address,
-            contractAddress,
+        }).then(async (signer) => {
+          let client = await SigningCosmWasmClient.connectWithSigner(
+          IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+            signer,
             {
-              update_position: {
-                stream_id: streamId,
-                position_owner: null,
-              },
-            },
-            "auto",
-            "Update Position",
-          ).then((response) => {
-          console.log(response)
-          }).catch((error) => {
-            console.log(error)
-          })      
-      })   
-    )
+              prefix: "wasm",
+              gasPrice: GasPrice.fromString("0.025uwasm"),
+            }
+          );
+          let address = (await signer.getAccounts())[0].address;
+         
+          return { client, address };
+          }).then(async (result) => {
+              console.log("Updating position for " + result.address)
+              const response = await result.client.execute(
+                result.address,
+                contractAddress,
+                {
+                  update_position: {
+                    stream_id: streamId,
+                    position_owner: null,
+                  },
+                },
+                "auto",
+                "Update Position",
+              );
+              return response
+              }).then((response) => {
+              console.log("Position: ", index)
+              console.log(response)
+              }).catch((error) => {
+                console.log(error)
+              })
+            }, 300 * index)
+     )
   }
 
   const queryTestStreamData = async () => {
-    new Promise((resolve, reject) => {
-    let total = 0;
-    addresses.map(async (address) => {
+    new Promise(async (resolve, reject) => {
+      let total = 0;
+      let positionNumber = 0;
+      const data: String[] = walletAddresses.slice(4000,5000)
+     
+      //wait for 20 seconds before each round
+      console.log(">>> Waiting for 20 seconds")
+      await new Promise(r => setTimeout(r, 3000));
+    data.map(async (address) => {
       const response = await clientTreasury?.queryContractSmart(
         contractAddress,
       {
@@ -694,6 +842,8 @@ import { resolve } from "path";
       }).then((response) => {
       total += Number(response.purchased)
       console.log(response.purchased)
+      positionNumber += 1
+      console.log("Position number: ", positionNumber)
       return response
       }).catch((error) => {
         console.log("Position not found")
@@ -701,8 +851,10 @@ import { resolve } from "path";
         setTotalPurchased(total)
       })
     })
+    
     resolve(total)
-    })
+    
+  })
   }
 
   
@@ -836,6 +988,8 @@ import { resolve } from "path";
                 <div className="flex flex-col ml-4">
                   <button className="w-[100px] border-2 rounded-sm ml-2" onClick={queryTestStreamData}>Query Test Data</button>
                   <span className="mt-2">Total Purchased: {totalPurchased}</span>
+                  <button className="w-[100px] border-2 rounded-sm ml-2" onClick={generateAddresses}>Generate Addresses</button>
+                  <button className="w-[100px] border-2 rounded-sm ml-2" onClick={sendTokens}>Send Tokens</button>
                 </div>
               </div>
            </div>
