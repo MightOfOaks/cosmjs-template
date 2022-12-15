@@ -5,7 +5,8 @@ import { LedgerSigner } from "@cosmjs/ledger-amino"
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx"
 import { fromHex, toBase64, toUtf8 } from "@cosmjs/encoding"
 import { getSigner, getLedgerSigner } from "./wallet"
-import { coin, makeCosmoshubPath } from "@cosmjs/amino"
+import { coin, makeCosmoshubPath, coins } from '@cosmjs/amino';
+import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
@@ -50,6 +51,12 @@ const main = async () => {
     }
   )
   console.log((await signer.getAccounts())[0].address)
+
+  const data = await client.queryContractRaw(
+    "stars1pljlwd62v3487tacxlwsm0v3gc4s9xswlmtgrxswnzdy0hv7f6dshvs2v4",
+    toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+  )
+  console.log(JSON.parse(new TextDecoder().decode(data as Uint8Array)))
   //client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1fvpmck9vtf2ys85zvtud2ss5pr63sh0th3yf32072g7s23emk5vs4u4lve', 1174, {}, 'auto')
   // console.log(await client.getContracts(1268))
   // console.log(await client.getContractCodeHistory("juno143rmxg4khjkxzk56pd3tru6wapenwls20y3shahlc5p9zgddyk8q27n0k4"))
@@ -99,13 +106,24 @@ const main = async () => {
   //   //     url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK3vUxZZXhDrHoLtbVbMNChIy71A8K8yMjtg&usqp=CAU',
   //   //   },
   //   }
-  
 
-  // const label = 'Test Coin'
+  // const msg = {
+  //   params:{
+  //     code_id: 613,
+  //     creation_fee: {amount: "1000000000", denom:"ustars"},
+  //     min_mint_price: {amount: "50000000", denom:"ustars"},
+  //     mint_fee_bps: 10,
+  //     max_trading_offset_secs: 86400,
+  //     extension: null,
+  //   }
+
+  // }
+  
+  // const label = 'Base Factory init'
   // let senderAddress = (await signer.getAccounts())[0].address
   // const response = await client.instantiate(
   //  senderAddress,
-  //   15,
+  //   612,
   //   msg,
   //   label,
   //   "auto"
@@ -353,16 +371,16 @@ const main = async () => {
   // }
   // const encode = (str: string):string => Buffer.from(str, 'binary').toString('base64');
 
-  const res = await client.execute(
-    'stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e',
-    'stars134d6rrhpwjtz356t42553tlc6gpqcm82nzv0xc5klshm2x4p6vxs95yw3k',
-    {
-      freeze_collection_info: {},
-    },
-    'auto'
-  )
+  // const res = await client.execute(
+  //   'stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e',
+  //   'stars134d6rrhpwjtz356t42553tlc6gpqcm82nzv0xc5klshm2x4p6vxs95yw3k',
+  //   {
+  //     freeze_collection_info: {},
+  //   },
+  //   'auto'
+  // )
 
-   console.log(res)
+  //  console.log(res)
 
   // const res = await client.queryContractSmart(
   //     'juno1n4txsd0494v4g2mqpq7s6wtk57shnut5hhnczcjq4dv774ek50nsyql45q',
