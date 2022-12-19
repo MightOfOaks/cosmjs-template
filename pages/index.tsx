@@ -61,7 +61,7 @@ import { resolve } from "path";
   const [creationFee, setCreationFee] = useState("1000");
   const [startTime, setStartTime] = useState<Date | undefined>(undefined);
   const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-  const [contractAddress, setcontractAddress] = useState("wasm1nzft0f2g3pcx3yuxj0yympueyne3f6mrz3jsfwap777j2lmphlvqccxfr4");
+  const [contractAddress, setcontractAddress] = useState("wasm1ry3nup4y70dvj4pne67gn2vhzcy4ncdca8s0tykwga399qqzdfcqt07gux");
   //state definitions for InstantiationParams
   const [minStreamSeconds, setMinStreamSeconds] = useState("60");
   const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
@@ -89,7 +89,7 @@ import { resolve } from "path";
   //query params
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
-  const [codeId , setCodeId] = useState(10);
+  const [codeId , setCodeId] = useState(15);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
   const [bobBalance , setBobBalance] = useState<any>();
   const [aliceBalance , setAliceBalance] = useState<any>();
@@ -314,7 +314,7 @@ import { resolve } from "path";
       const response = await clientBob?.execute(Bob.address,
         contractAddress,
         {
-          update_distribution: {
+          update_stream: {
             stream_id: streamId,
           },
         },
@@ -621,7 +621,8 @@ import { resolve } from "path";
               "Subscribe",
               [coin(Number(1000), inDenom)]
             )
-            console.log(res)}
+            console.log(res)
+          }
             else {
               console.log("Sending transaction for Withdraw")
               const res = await result.client.execute(
@@ -683,8 +684,45 @@ import { resolve } from "path";
     )
   }
 
+  const exitStreamForAllPositions = async () => {
+    mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+      hdPaths: [makeCosmoshubPath(0)],
+      prefix: "wasm",
+    }).then(async (signer) => { 
+      let client = await SigningCosmWasmClient.connectWithSigner(
+      IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
+        signer,
+        {
+          prefix: "wasm",
+          gasPrice: GasPrice.fromString("0.025uwasm"),
+        }
+      );
+      let address = (await signer.getAccounts())[0].address;
+      return { client, address };
+      }).then(async (result) => {
+          console.log("Exit Stream for " + result.address)
+          const response = await result.client.execute(
+            result.address,
+            contractAddress,
+            {
+              exit_stream: {
+                stream_id: streamId,
+                position_owner: null
+              },
+            },
+            "auto",
+            "Exit Stream",
+          ).then((response) => {
+          console.log(response)
+          }).catch((error) => {
+            console.log(error)
+          })      
+      })   
+    )
+  }
+
   const queryTestStreamData = async () => {
-    new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
     let total = 0;
     addresses.map(async (address) => {
       const response = await clientTreasury?.queryContractSmart(
@@ -692,8 +730,8 @@ import { resolve } from "path";
       {
         position: { stream_id: streamId, owner: address },
       }).then((response) => {
-      total += Number(response.purchased)
-      console.log(response.purchased)
+      total += Number(response.pending_purchase)
+      console.log(response.spent, response.purchased, response.spent/response.purchased*100)
       return response
       }).catch((error) => {
         console.log("Position not found")
@@ -702,7 +740,7 @@ import { resolve } from "path";
       })
     })
     resolve(total)
-    })
+  })
   }
 
   
@@ -833,6 +871,7 @@ import { resolve } from "path";
                 </div>
                 <button className="w-[100px] border-2 rounded-sm ml-2" onClick={testStream}>Test Stream</button>
                 <button className="w-[100px] border-2 rounded-sm ml-2" onClick={updateTestPositions}>Update Test Positions</button>
+                <button className="w-[100px] border-2 rounded-sm ml-2" onClick={exitStreamForAllPositions}>Exit Stream for All Positions</button>
                 <div className="flex flex-col ml-4">
                   <button className="w-[100px] border-2 rounded-sm ml-2" onClick={queryTestStreamData}>Query Test Data</button>
                   <span className="mt-2">Total Purchased: {totalPurchased}</span>
