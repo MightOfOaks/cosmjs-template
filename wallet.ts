@@ -4,7 +4,7 @@ import { LedgerSigner } from "@cosmjs/ledger-amino"
 
 const walletOptions = {
   hdPaths: [makeCosmoshubPath(0)],
-  prefix: "wasm",
+  prefix: "osmo",
 }
 
 export const getSigner = async (mnemonic: string) => {

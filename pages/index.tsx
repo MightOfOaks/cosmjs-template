@@ -22,29 +22,11 @@ import {
   import axios from "axios";
 import { resolve } from "path";
   
-  interface InstantiationParams {
-      min_stream_seconds: string,
-      min_seconds_until_start_time: string,
-      stream_creation_denom: string,
-      stream_creation_fee: string,
-      fee_collector: string,
-  }
-  
-  interface CreateStreamParams {
-      treasury: string,
-      name: string,
-      url: string,
-      in_denom: string,
-      out_denom: string,
-      out_supply: string,
-      start_time: string,
-      end_time: string,
-  }
   
   const IS_TESTNET = !process.argv.includes("--mainnet");
   
   const MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi";
-  const TESTNET_RPC = "https://rpc.streamswap-devnet.omniflix.co:443/";
+  const TESTNET_RPC = "https://rpc-test.osmosis.zone";
   
   
   const Home: NextPage = () => {
@@ -57,23 +39,21 @@ import { resolve } from "path";
   const [inDenom, setInDenom] = useState("ujuno");
   const [outDenom, setOutDenom] = useState("uosmo");
   const [outSupply, setOutSupply] = useState("1000000");
-  const [creationDenom, setCreationDenom] = useState("uwasm");
+  const [creationDenom, setCreationDenom] = useState("uosmo");
   const [creationFee, setCreationFee] = useState("1000");
   const [startTime, setStartTime] = useState<Date | undefined>(undefined);
   const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-  const [contractAddress, setcontractAddress] = useState("wasm1ry3nup4y70dvj4pne67gn2vhzcy4ncdca8s0tykwga399qqzdfcqt07gux");
+  const [contractAddress, setcontractAddress] = useState("osmo13nzjgafq86538q8q20ejrglfk533kasnjs0jpg4fay6wth6zxmxq7szz3w");
   //state definitions for InstantiationParams
-  const [minStreamSeconds, setMinStreamSeconds] = useState("60");
-  const [minSecondsUntilStartTime, setMinSecondsUntilStartTime] = useState("30");
-  const [streamCreationDenom, setStreamCreationDenom] = useState("uwasm");
-  const [streamCreationFee, setStreamCreationFee] = useState("1000");
-  const [feeCollector, setFeeCollector] = useState(treasury.address);
+  const [stakedTokenDenom, setStakedTokenDenom] = useState("factory/osmo1r5fz6rauxgpwd9lwqae3jn4y5v5h6m0370tv7z/abc");
+  const [rewardDenom, setRewardDenom] = useState("uosmo");
+  const [admin, setAdmin] = useState<string | undefined>(undefined);
   //state definitions for users positions
   const [contracts , setcontracts] = useState<readonly string[]>([]);
-  const [positionBob , setPositionBob] = useState("");
-  const [positionAlice , setPositionAlice] = useState("");
-  const [positionRick , setPositionRick] = useState("");
-  const [streamData, setStreamData] = useState("");
+  const [holderResponseBob , setHolderResponseBob] = useState("");
+  const [holderResponseAlice , setHolderResponseAlice] = useState("");
+  const [holderResponseRick , setHolderResponseRick] = useState("");
+  const [stateData, setStateData] = useState("");
   const [configData, setConfigData] = useState("");
   
   const [signerBob, setSignerBob] = useState<DirectSecp256k1HdWallet>();
@@ -89,7 +69,7 @@ import { resolve } from "path";
   //query params
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
-  const [codeId , setCodeId] = useState(15);
+  const [codeId , setCodeId] = useState(5148);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
   const [bobBalance , setBobBalance] = useState<any>();
   const [aliceBalance , setAliceBalance] = useState<any>();
@@ -98,26 +78,26 @@ import { resolve } from "path";
   const [testDuration , setTestDuration] = useState(30);
   const [totalPurchased , setTotalPurchased] = useState(0);
   
-  //subscribe parameters
-  const [subscribeAmountBob , setSubscribeAmountBob] = useState("1000000");
-  const [subscribeAmountAlice , setSubscribeAmountAlice] = useState("1000000");
-  const [subscribeAmountRick , setSubscribeAmountRick] = useState("1000000");
-  const [subscribeDenomBob , setSubscribeDenomBob] = useState("ujuno");
-  const [subscribeDenomAlice , setSubscribeDenomAlice] = useState("ujuno");
-  const [subscribeDenomRick , setSubscribeDenomRick] = useState("ujuno");
+  //bondStake parameters
+  const [bondStakeAmountBob , setbondStakeAmountBob] = useState("1");
+  const [bondStakeAmountAlice , setbondStakeAmountAlice] = useState("1");
+  const [bondStakeAmountRick , setbondStakeAmountRick] = useState("1");
+  const [bondStakeDenomBob , setbondStakeDenomBob] = useState("factory/osmo1r5fz6rauxgpwd9lwqae3jn4y5v5h6m0370tv7z/abc");
+  const [bondStakeDenomAlice , setbondStakeDenomAlice] = useState("factory/osmo1r5fz6rauxgpwd9lwqae3jn4y5v5h6m0370tv7z/abc");
+  const [bondStakeDenomRick , setbondStakeDenomRick] = useState("factory/osmo1r5fz6rauxgpwd9lwqae3jn4y5v5h6m0370tv7z/abc");
   
     
     const init = async () => {
       await DirectSecp256k1HdWallet.fromMnemonic(treasury.mnemonic, {
         hdPaths: [makeCosmoshubPath(0)],
-        prefix: "wasm",
+        prefix: "osmo",
       }).then(async (signer) => { 
         let client = await SigningCosmWasmClient.connectWithSigner(
         IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
           signer,
           {
-            prefix: "wasm",
-            gasPrice: GasPrice.fromString("0.025uwasm"),
+            prefix: "osmo",
+            gasPrice: GasPrice.fromString("0.025uosmo"),
           }
         );
         setSignerTreasury(signer)
@@ -125,24 +105,22 @@ import { resolve } from "path";
         }).then(async (client) => {
             setClientTreasury(client);
             console.log("Treasury: ",client)
-            const ujunoBal = await client.getBalance(treasury.address, "ujuno")
             const uosmoBal = await client.getBalance(treasury.address, "uosmo")
-            const uwasmBal = await client.getBalance(treasury.address, "uwasm")
-            setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount} uwasm: ${uwasmBal?.amount}`)
+            setTreasuryBalance(`uosmo: ${uosmoBal?.amount}`)
             const blockInfo = await client.getBlock()
             setHeight(JSON.stringify({height: blockInfo?.header.height, time: new Date(blockInfo?.header.time).toLocaleString()},null,2).trim())      
         });
 
         await DirectSecp256k1HdWallet.fromMnemonic(Bob.mnemonic, {
           hdPaths: [makeCosmoshubPath(0)],
-          prefix: "wasm",
+          prefix: "osmo",
         }).then(async (signer) => { 
           let client = await SigningCosmWasmClient.connectWithSigner(
           IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
             signer,
             {
-              prefix: "wasm",
-              gasPrice: GasPrice.fromString("0.025uwasm"),
+              prefix: "osmo",
+              gasPrice: GasPrice.fromString("0.025uosmo"),
             }
           );
           setSignerBob(signer)
@@ -150,21 +128,20 @@ import { resolve } from "path";
           }).then(async (client) => {
             setClientBob(client);
             console.log("Bob: ", client)
-            const bobJunoBal = await client.getBalance(Bob.address, "ujuno")
             const bobOsmoBal = await client.getBalance(Bob.address, "uosmo")
-            setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)   
+            setBobBalance(`uosmo: ${bobOsmoBal?.amount}`)   
           });
 
           await DirectSecp256k1HdWallet.fromMnemonic(Alice.mnemonic, {
             hdPaths: [makeCosmoshubPath(0)],
-            prefix: "wasm",
+            prefix: "osmo",
           }).then(async (signer) => { 
             let client = await SigningCosmWasmClient.connectWithSigner(
             IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
               signer,
               {
-                prefix: "wasm",
-                gasPrice: GasPrice.fromString("0.025uwasm"),
+                prefix: "osmo",
+                gasPrice: GasPrice.fromString("0.025uosmo"),
               }
             );
             setSignerAlice(signer)
@@ -172,21 +149,20 @@ import { resolve } from "path";
             }).then(async (client) => {
               setClientAlice(client);
               console.log("Alice: ", client)
-              const aliceJunoBal = await client.getBalance(Alice.address, "ujuno")
               const aliceOsmoBal = await client.getBalance(Alice.address, "uosmo")
-              setAliceBalance(`ujuno: ${aliceJunoBal?.amount} uosmo: ${aliceOsmoBal?.amount}`)
+              setAliceBalance(`uosmo: ${aliceOsmoBal?.amount}`)
             });
 
             await DirectSecp256k1HdWallet.fromMnemonic(Rick.mnemonic, {
               hdPaths: [makeCosmoshubPath(0)],
-              prefix: "wasm",
+              prefix: "osmo",
             }).then(async (signer) => { 
               let client = await SigningCosmWasmClient.connectWithSigner(
               IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
                 signer,
                 {
-                  prefix: "wasm",
-                  gasPrice: GasPrice.fromString("0.025uwasm"),
+                  prefix: "osmo",
+                  gasPrice: GasPrice.fromString("0.025uosmo"),
                 }
               );
               setSignerRick(signer)
@@ -194,9 +170,8 @@ import { resolve } from "path";
               }).then(async (client) => {
                 setClientRick(client);
                 console.log("Rick: ", client)
-                const rickJunoBal = await client.getBalance(Rick.address, "ujuno")
                 const rickOsmoBal = await client.getBalance(Rick.address, "uosmo")
-                setRickBalance(`ujuno: ${rickJunoBal?.amount} uosmo: ${rickOsmoBal?.amount}`)
+                setRickBalance(`uosmo: ${rickOsmoBal?.amount}`)
               });
       
     }
@@ -211,6 +186,10 @@ import { resolve } from "path";
           if(Number(codeId)){
             const streamContracts = await clientTreasury?.getContracts(codeId)
             setcontracts(streamContracts)
+
+            if(streamContracts?.length){
+              setcontractAddress(streamContracts[streamContracts?.length-1])
+            }
           }
           const configRes= await clientTreasury?.queryContractRaw(contractAddress,toUtf8(Buffer.from(Buffer.from("config").toString("hex"),"hex").toString()))
           let decodedRes = JSON.parse(new TextDecoder().decode(configRes as Uint8Array))
@@ -231,20 +210,15 @@ import { resolve } from "path";
 
     const updateBalances = async () => {
       console.log("Updating balances")
-      const ujunoBal = await clientTreasury?.getBalance(treasury.address, "ujuno")
       const uosmoBal = await clientTreasury?.getBalance(treasury.address, "uosmo")
-      const uwasmBal = await clientTreasury?.getBalance(treasury.address, "uwasm")
-      const bobJunoBal = await clientTreasury?.getBalance(Bob.address, "ujuno")
-      const aliceJunoBal = await clientTreasury?.getBalance(Alice.address, "ujuno")
-      const rickJunoBal = await clientTreasury?.getBalance(Rick.address, "ujuno")
       const bobOsmoBal = await clientTreasury?.getBalance(Bob.address, "uosmo")
       const aliceOsmoBal = await clientTreasury?.getBalance(Alice.address, "uosmo")
       const rickOsmoBal = await clientTreasury?.getBalance(Rick.address, "uosmo")
 
-      setTreasuryBalance(`ujuno: ${ujunoBal?.amount} uosmo: ${uosmoBal?.amount} uwasm: ${uwasmBal?.amount}`)
-      setBobBalance(`ujuno: ${bobJunoBal?.amount} uosmo: ${bobOsmoBal?.amount}`)
-      setAliceBalance(`ujuno: ${aliceJunoBal?.amount} uosmo: ${aliceOsmoBal?.amount}`)
-      setRickBalance(`ujuno: ${rickJunoBal?.amount} uosmo: ${rickOsmoBal?.amount}`)
+      setTreasuryBalance(`uosmo: ${uosmoBal?.amount}`)
+      setBobBalance(`uosmo: ${bobOsmoBal?.amount}`)
+      setAliceBalance(`uosmo: ${aliceOsmoBal?.amount}`)
+      setRickBalance(`uosmo: ${rickOsmoBal?.amount}`)
     }
 
 
@@ -252,7 +226,7 @@ import { resolve } from "path";
       //append balances as string
       let balances = `Treasury Balance: ${treasuryBalance} \nBob Balance: ${bobBalance} \nAlice Balance: ${aliceBalance} \nRick Balance: ${rickBalance}`
       const element = document.createElement("a");
-      const file = new Blob([balances, "\n\n", "Contract Config\n", configData, "\n\n", height, "\n\nLast Action:\n", lastAction, "\n\nStream Details\n", streamData, "\n\nAlice's Position\n", positionAlice, "\n\nBob's Position\n", positionBob, "\n\nRick's Position\n", positionRick], {type: 'text/plain'});
+      const file = new Blob([balances, "\n\n", "Contract Config\n", configData, "\n\n", height, "\n\nLast Action:\n", lastAction, "\n\nStream Details\n", stateData, "\n\nAlice's Holder Response\n", holderResponseAlice, "\n\nBob's Holder Response\n", holderResponseBob, "\n\nRick's Holder Response\n", holderResponseRick], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
       element.download = "testData.json";
       document.body.appendChild(element);
@@ -262,18 +236,17 @@ import { resolve } from "path";
     const instantiate = async () => {
       console.log("Instantiating a new contract")
       const msg = {
-      min_stream_seconds: minStreamSeconds,
-      min_seconds_until_start_time: minSecondsUntilStartTime,
-      stream_creation_denom: streamCreationDenom,
-      stream_creation_fee: streamCreationFee,
-      fee_collector: treasury.address,
+        staked_token_denom: stakedTokenDenom,
+        reward_denom: rewardDenom,
+        admin: admin,
+      
     }
   
     const response = await clientTreasury?.instantiate(
       treasury.address,
       codeId,
       msg,
-      'SS Contract',
+      'cw-share instantiation',
       "auto"
     )
     if(response)
@@ -309,31 +282,29 @@ import { resolve } from "path";
             console.log(executeResponse)
     }
   
-    const updateDistribution = async () => {
-      console.log("Update Distribution Index")
-      const response = await clientBob?.execute(Bob.address,
+    const updateRewardIndex = async () => {
+      console.log("Update Reward Index")
+      const response = await clientTreasury?.execute(treasury.address,
         contractAddress,
         {
-          update_stream: {
-            stream_id: streamId,
-          },
+          update_reward_index: {},
         },
         "auto",
       )
       console.log(response)
     }
   
-    const queryStream = async () => {
+    const queryState = async () => {
       console.log("Query Stream")
       console.log(contractAddress)
       console.log(clientTreasury)
       const response = await clientTreasury?.queryContractSmart(
         contractAddress,
       {
-        stream: { stream_id: streamId },
+        state: {},
       })
       console.log(response)
-      setStreamData(JSON.stringify(response,undefined,2).trim())
+      setStateData(JSON.stringify(response,undefined,2).trim())
     }
     const finalizeStream = async () => {
       console.log("Finalize Stream")
@@ -353,32 +324,29 @@ import { resolve } from "path";
       console.log(executeResponse) 
     }
   
-    const queryPositionBob = async () => {
-      console.log("Query Bob's Position")
+    const queryHolderBob = async () => {
+      console.log("Query Holder for Bob")
       const response = await clientBob?.queryContractSmart(
         contractAddress,
       {
-        position: { stream_id: streamId, owner: Bob.address },
+        holder: { address: Bob.address },
       })
       console.log(response)
-      setPositionBob(JSON.stringify(response,undefined,2).trim())
+      setHolderResponseBob(JSON.stringify(response,undefined,2).trim())
     }
   
-    const subscribeBob = async () => {
-      console.log("Subscribe Bob")
-      setLastAction("Subscribe Bob")
+    const bondStakeBob = async () => {
+      console.log("Bond Stake Bob")
+      console.log(clientBob)
+      setLastAction("Bond Stake Bob")
       const response = await clientBob?.execute(Bob.address,
         contractAddress,
         {
-          subscribe: {
-            stream_id: streamId,
-            position_owner: null,
-            operator: null
-          },
+          bond_stake: {},
         },
         "auto",
-        "Subscribe Bob",
-        [coin(Number(subscribeAmountBob), subscribeDenomBob)]
+        "Bond Stake Bob",
+        [coin(Number(bondStakeAmountBob), bondStakeDenomBob)]
       )
       console.log(response)
     }
@@ -390,11 +358,7 @@ import { resolve } from "path";
           Bob.address,
           contractAddress,
           {
-            withdraw: {
-              stream_id: streamId,
-              cap: null,
-              position_owner: null
-            },
+            withdraw_stake: {},
           },
           "auto",
           "Withdraw Bob",
@@ -402,50 +366,58 @@ import { resolve } from "path";
         console.log(executeResponse) 
     }
 
-    const exitStreamBob = async () => {
-      console.log("Exit Stream Bob")
-      setLastAction("Exit Stream Bob")
+    const receiveRewardBob = async () => {
+      console.log("Receive Reward Bob")
+      setLastAction("Receive Reward Bob")
       const executeResponse = await clientBob?.execute(
         Bob.address,
         contractAddress,
         {
-          exit_stream: {
-            stream_id: streamId,
-            position_owner: null
-          },
+          receive_reward: {},
         },
         "auto",
-        "Exit Bob",
+        "Receive Reward Bob",
+      )
+      console.log(executeResponse) 
+    }
+    
+    const updateHolderRewardBob = async () => {
+      console.log("Update Reward Bob")
+      setLastAction("Update Reward Bob")
+      const executeResponse = await clientBob?.execute(
+        Bob.address,
+        contractAddress,
+        {
+          update_holders_reward: {},
+        },
+        "auto",
+        "Update Reward Bob",
       )
       console.log(executeResponse) 
     }
   
-    const queryPositionAlice = async () => {
-      console.log("Query Alice's Position")
+    const queryHolderAlice = async () => {
+      console.log("Query Holder for Alice")
       const response = await clientAlice?.queryContractSmart(
         contractAddress,
       {
-        position: { stream_id: streamId, owner: Alice.address },
+        holder: { address: Alice.address },
       })
       console.log(response)
-      setPositionAlice(JSON.stringify(response,undefined,2).trim())
+      setHolderResponseAlice(JSON.stringify(response,undefined,2).trim())
     }
   
-    const subscribeAlice = async () => {
-      console.log("Subscribe Alice")
-      setLastAction("Subscribe Alice")
+    const bondStakeAlice = async () => {
+      console.log("Bond Stake Alice")
+      setLastAction("Bond Stake Alice")
       const response = await clientAlice?.execute(Alice.address,
         contractAddress,
         {
-          subscribe: {
-            stream_id: streamId,
-            position_owner: null,
-            operator: null
-          },
+          bond_stake: {},
         },
         "auto",
-        "Subscribe Alice",
-        [coin(Number(subscribeAmountAlice), subscribeDenomAlice)]
+        "Bond Stake Alice",
+        [coin(Number(bondStakeAmountAlice), bondStakeDenomAlice)]
       )
       console.log(response)
     }
@@ -457,11 +429,7 @@ import { resolve } from "path";
           Alice.address,
           contractAddress,
           {
-            withdraw: {
-              stream_id: streamId,
-              cap: null,
-              position_owner: null
-            },
+            withdraw_stake: {},
           },
           "auto",
           "Withdraw Alice",
@@ -469,51 +437,59 @@ import { resolve } from "path";
         console.log(executeResponse) 
     }
 
-    const exitStreamAlice = async () => {
-      console.log("Exit Stream Alice")
-      setLastAction("Exit Stream Alice")
+    const receiveRewardAlice = async () => {
+      console.log("Receive Reward Alice")
+      setLastAction("Receive Reward Alice")
       const executeResponse = await clientAlice?.execute(
         Alice.address,
         contractAddress,
         {
-          exit_stream: {
-            stream_id: streamId,
-            position_owner: null
-          },
+          receive_reward: {},
         },
         "auto",
-        "Exit Alice",
+        "Receive Reward Alice",
+      )
+      console.log(executeResponse) 
+    }
+
+    const updateHolderRewardAlice = async () => {
+      console.log("Update Reward Alice")
+      setLastAction("Update Reward Alice")
+      const executeResponse = await clientAlice?.execute(
+        Alice.address,
+        contractAddress,
+        {
+          update_holders_reward: {},
+        },
+        "auto",
+        "Update Reward Alice",
       )
       console.log(executeResponse) 
     }
   
-    const queryPositionRick = async () => {
-      console.log("Query Rick's Position")
+    const queryHolderRick = async () => {
+      console.log("Query Holder for Rick")
       const response = await clientRick?.queryContractSmart(
         contractAddress,
       {
-        position: { stream_id: streamId, owner: Rick.address },
+        holder: { address: Rick.address },
       })
       console.log(response)
-      setPositionRick(JSON.stringify(response,undefined,2).trim())
+      setHolderResponseRick(JSON.stringify(response,undefined,2).trim())
     }
   
-    const subscribeRick = async () => {
-      console.log("Subscribe Rick")
-      setLastAction("Subscribe Rick")
+    const bondStakeRick = async () => {
+      console.log("Bond Stake Rick")
+      setLastAction("Bond Stake Rick")
       console.log(clientRick)
       const response = await clientRick?.execute(Rick.address,
         contractAddress,
         {
-          subscribe: {
-            stream_id: streamId,
-            position_owner: null,
-            operator: null
-          },
+          bond_stake: {},
         },
         "auto",
-        "Subscribe Rick",
-        [coin(Number(subscribeAmountRick), subscribeDenomRick)]
+        "Bond Stake Rick",
+        [coin(Number(bondStakeAmountRick), bondStakeDenomRick)]
       )
       console.log(response)
     }
@@ -525,11 +501,7 @@ import { resolve } from "path";
           Rick.address,
           contractAddress,
           {
-            withdraw: {
-              stream_id: streamId,
-              cap: null,
-              position_owner: null
-            },
+            withdraw_stake: {},
           },
           "auto",
           "Withdraw Rick",
@@ -537,20 +509,32 @@ import { resolve } from "path";
         console.log(executeResponse) 
     }
    
-    const exitStreamRick = async () => {
-      console.log("Exit Stream Rick")
-      setLastAction("Exit Stream Rick")
+    const receiveRewardRick = async () => {
+      console.log("Receive Reward Rick")
+      setLastAction("Receive Reward Rick")
       const executeResponse = await clientRick?.execute(
         Rick.address,
         contractAddress,
         {
-          exit_stream: {
-            stream_id: streamId,
-            position_owner: null
-          },
+          receive_reward: {},
         },
         "auto",
-        "Exit Rick",
+        "Receive Reward Rick",
+      )
+      console.log(executeResponse) 
+    }
+
+    const updateHolderRewardRick = async () => {
+      console.log("Update Reward Rick")
+      setLastAction("Update Reward Rick")
+      const executeResponse = await clientRick?.execute(
+        Rick.address,
+        contractAddress,
+        {
+          update_holders_reward: {},
+        },
+        "auto",
+        "Update Reward Rick",
       )
       console.log(executeResponse) 
     }
@@ -558,14 +542,14 @@ import { resolve } from "path";
     const testStream = async () => {
     mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       hdPaths: [makeCosmoshubPath(0)],
-      prefix: "wasm",
+      prefix: "osmo",
     }).then(async (signer) => { 
       let client = await SigningCosmWasmClient.connectWithSigner(
       IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
         signer,
         {
-          prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
+          prefix: "osmo",
+          gasPrice: GasPrice.fromString("0.025uosmo"),
         }
       );
       let address = (await signer.getAccounts())[0].address;
@@ -583,14 +567,10 @@ import { resolve } from "path";
             result.address,
             contractAddress,
             {
-              subscribe: {
-                stream_id: streamId,
-                position_owner: null,
-                operator: null
-              },
+              bond_stake: {},
             },
             "auto",
-            "Subscribe",
+            "Bond Stake",
             [coin(Number(1000), inDenom)]
           ).then((response) => {
           console.log(response)
@@ -606,19 +586,15 @@ import { resolve } from "path";
           setTimeout(async () => {
             let random = Math.floor(Math.random() * 2) + 1;
             if (random == 1) {
-              console.log("Sending transaction for Subscribe")
+              console.log("Sending transaction for Bond Stake")
               const res = await result.client.execute(
               result.address,
               contractAddress,
               {
-                subscribe: {
-                  stream_id: streamId,
-                  position_owner: null,
-                  operator: null
-                },
+                bond_stake: {},
               },
               "auto",
-              "Subscribe",
+              "Bond Stake",
               [coin(Number(1000), inDenom)]
             )
             console.log(res)
@@ -650,14 +626,14 @@ import { resolve } from "path";
   const updateTestPositions = async () => {
     mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       hdPaths: [makeCosmoshubPath(0)],
-      prefix: "wasm",
+      prefix: "osmo",
     }).then(async (signer) => { 
       let client = await SigningCosmWasmClient.connectWithSigner(
       IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
         signer,
         {
-          prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
+          prefix: "osmo",
+          gasPrice: GasPrice.fromString("0.025uosmo"),
         }
       );
       let address = (await signer.getAccounts())[0].address;
@@ -687,14 +663,14 @@ import { resolve } from "path";
   const exitStreamForAllPositions = async () => {
     mnemonics.map(async (mnemonic) => await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       hdPaths: [makeCosmoshubPath(0)],
-      prefix: "wasm",
+      prefix: "osmo",
     }).then(async (signer) => { 
       let client = await SigningCosmWasmClient.connectWithSigner(
       IS_TESTNET ? TESTNET_RPC : MAINNET_RPC,
         signer,
         {
-          prefix: "wasm",
-          gasPrice: GasPrice.fromString("0.025uwasm"),
+          prefix: "osmo",
+          gasPrice: GasPrice.fromString("0.025uosmo"),
         }
       );
       let address = (await signer.getAccounts())[0].address;
@@ -745,7 +721,7 @@ import { resolve } from "path";
 
   
     return (
-    <div className="mx-8"> 
+    <div className="mx-8 bg-gradient-to-r from-blue-300 to-blue-50"> 
       <div className="ml-8 mt-10">
           <label className='mx-2 font-bold'>Wallet details</label>
           <br />
@@ -775,7 +751,7 @@ import { resolve } from "path";
 
       </div>
       <div className='ml-8 mt-20  flex flex-col'>
-        <div className='top-0 absolute mt-1 '>
+        <div className='top-0 absolute mt-1'>
           {height}
           </div>
 
@@ -785,66 +761,27 @@ import { resolve } from "path";
             
             <label className='mt-2'>Code Id</label>
             <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={codeId} onChange={e => setCodeId(Number(e.target.value))} />
-            <label className='mt-2'>Min Stream Seconds</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={minStreamSeconds} onChange={e => setMinStreamSeconds(e.target.value)} />
-            <label className='mt-2'>Min Seconds Until Start Time</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={minSecondsUntilStartTime} onChange={e => setMinSecondsUntilStartTime(e.target.value)} />
-            <label className='mt-2'>Stream Creation Denom</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamCreationDenom} onChange={e => setStreamCreationDenom(e.target.value)} />
-            <label className='mt-2'>Stream Creation Fee</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={streamCreationFee} onChange={e => setStreamCreationFee(e.target.value)} />
-            <label className='mt-2'>Fee Collector</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={feeCollector} onChange={e => setFeeCollector(e.target.value)} />
+            <label className='mt-2'>Staked Token Denom</label>
+            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={stakedTokenDenom} onChange={e => setStakedTokenDenom(e.target.value)} />
+            <label className='mt-2'>Reward Token Denom</label>
+            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={rewardDenom} onChange={e => setRewardDenom(e.target.value)} />
+            <label className='mt-2'>Admin Address</label>
+            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={admin} onChange={e => setAdmin(e.target.value)} />
               <button className='mt-2 border-4 border-black' onClick={instantiate}>Instantiate
               </button>
-              <label className='mt-2 underline'>Contracts instantiated with the Code Id of {codeId}</label>
-              {contracts.map((contract, index) => (
-                <div key={index}>
-                  <span className="text-lg">{contract}</span>
-                </div>
-              ))}
   
           </div>
-          <div className='w-1/3 flex flex-col ml-4'>
-            <span>Stream Creation Parameters</span>
+            
+          <div className='flex flex-col ml-4 w-full'>
+          <div className='w-1/3 flex flex-col mt-6 ml-5 mb-2'>
             <label className="mt-2" > Contract adddress</label>
             <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={contractAddress} onChange={e => setcontractAddress(e.target.value)} />
-            <label className="mt-2">Treasury Address</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={treasuryAddress} onChange={e => setTreasuryAddress(e.target.value)} />
-            <label className="mt-2"> Name</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={name} onChange={e => setName(e.target.value)} />
-            <label className="mt-2">Url</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={url} onChange={e => setUrl(e.target.value)} />
-            <label className="mt-2">inDenom</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={inDenom} onChange={e => setInDenom(e.target.value)} />
-            <label className="mt-2">Out Denom</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={outDenom} onChange={e => setOutDenom(e.target.value)} />
-            <label className="mt-2">Out supply</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={outSupply} onChange={e => setOutSupply(e.target.value)} />
-            <label className="mt-2">Creation Fee Denom</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={creationDenom} onChange={e => setCreationDenom(e.target.value)} />
-            <label className="mt-2">Creation Fee</label>
-            <input className='w-full h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={creationFee} onChange={e => setCreationFee(e.target.value)} />
-            <label className='mt-2'>Start Time</label>
-            <div className="border-2 border-black mt-2">
-              <InputDateTime minDate={new Date()} onChange={(date: SetStateAction<Date | undefined>) => setStartTime(date)} value={startTime} />
-            </div>
-            <label className='mt-2'>End Time</label>
-            <div className="border-2 border-black mt-2">
-              <InputDateTime minDate={new Date()} onChange={(date: SetStateAction<Date | undefined>) => setEndTime(date)} value={endTime} />
-            </div>
-            <button className='mt-2 border-4 border-black' onClick={createStream}>Create Stream
-            </button>
-            
-  
-  
-          </div>
-          <div className='flex flex-col ml-4 w-full'>
-            <div className="flex flex-row mx-5 mb-10 w-full">
+          </div>            
+            <div className="flex flex-row mx-5 mb-10 w-3/4">
               <div className="flex flex-col w-full">
-              <label className='mb-2'>Stream Details</label>        
+              <label className='mb-2'>Current State</label>        
               <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
-                <pre>{streamData}</pre>
+                <pre>{stateData}</pre>
               </div>
               </div>
               <div className="flex flex-col w-full">
@@ -856,27 +793,10 @@ import { resolve } from "path";
   
             </div>
             <div className="flex flex-row ml-4">
-              <button className="w-[100px] border-2 rounded-sm" onClick={queryStream}>Query Stream</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={updateDistribution}>Update Distribution</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={finalizeStream}>Finalize Stream</button>
-              <label className='mx-4 mt-4'>Stream Id</label>
-              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="Number" value={streamId} onChange={e => setStreamId(Number(e.target.value))}/>
-              <button className="w-[100px] border-2 rounded-sm ml-72" onClick={downloadTestData}>Download Test Data</button>
-              <span className="ml-4">(Downloads the test data currently displayed. The user is expected to update the data beforehand.)</span>
-              
-              <div className="flex flex-row w-full ml-32">
-                <div className="flex flex-col ml-4">
-                  <label className=''>Test Duration in minutes</label>
-                  <input className='w-24 h-12 ml-20 border-2 border-black' type="Number" value={testDuration} onChange={e => setTestDuration(Number(e.target.value))}/>
-                </div>
-                <button className="w-[100px] border-2 rounded-sm ml-2" onClick={testStream}>Test Stream</button>
-                <button className="w-[100px] border-2 rounded-sm ml-2" onClick={updateTestPositions}>Update Test Positions</button>
-                <button className="w-[100px] border-2 rounded-sm ml-2" onClick={exitStreamForAllPositions}>Exit Stream for All Positions</button>
-                <div className="flex flex-col ml-4">
-                  <button className="w-[100px] border-2 rounded-sm ml-2" onClick={queryTestStreamData}>Query Test Data</button>
-                  <span className="mt-2">Total Purchased: {totalPurchased}</span>
-                </div>
-              </div>
+              <button className="w-[100px] border-2 rounded-sm" onClick={queryState}>Query State</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={updateRewardIndex}>Update Reward Index</button>
+              <button className="w-[100px] border-2 rounded-sm ml-8" onClick={downloadTestData}>Download Test Data</button>
+              <span className="mt-6 ml-4">(Downloads the test data currently displayed. The user is expected to update the data beforehand.)</span>
            </div>
            </div> 
         </div>  
@@ -884,66 +804,77 @@ import { resolve } from "path";
         <div className="w-full flex flex-row mx-4 mb-10">
           <div className="w-full flex flex-col mr-2">
               <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
-                <pre>{positionBob}</pre>
+                <pre>{holderResponseBob}</pre>
               </div>
             <div className="flex flex-row">
-              <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionBob}>Query Bob's Position</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeBob}>Subscribe for Bob</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawBob}>Withdraw for Bob</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={exitStreamBob}>Exit Stream for Bob</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={queryHolderBob}>Query Holder for Bob </button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={bondStakeBob}>Bond Stake for Bob</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawBob}>Withdraw Stake for Bob</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={receiveRewardBob}>Receive Reward for Bob</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={updateHolderRewardBob}>Update Holder Reward for Bob</button>
+
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
             <div className="mt-2 flex flex-row">
-              <label className='mx-4 mt-4'>Subscription Denom</label>
-              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomBob} onChange={e => setSubscribeDenomBob(e.target.value)}/>
-              <label className='mx-4 mt-4'>Subscription Amount</label>
-              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountBob} onChange={e => setSubscribeAmountBob(e.target.value)}/>
+              <label className='mx-4 mt-4'>Bond Stake Denom</label>
+              <input className='w-16 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={bondStakeDenomBob} onChange={e => setbondStakeDenomBob(e.target.value)}/>
+              <label className='mx-4 mt-4'>Bond Stake Amount</label>
+              <input className='w-28 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={bondStakeAmountBob} onChange={e => setbondStakeAmountBob(e.target.value)}/>
             </div>
           </div>
           <div className="w-full flex flex-col mr-2">
             <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
-                <pre>{positionAlice}</pre>
+                <pre>{holderResponseAlice}</pre>
             </div>
             <div className="flex flex-row">
-              <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionAlice}>Query Alice's Position</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeAlice}>Subscribe for Alice</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawAlice}>Withdraw for Alice</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={exitStreamAlice}>Exit Stream for Alice</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={queryHolderAlice}>Query Holder for Alice</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={bondStakeAlice}>Bond Stake for Alice</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawAlice}>Withdraw Stake for Alice</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={receiveRewardAlice}>Receive Reward for Alice</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={updateHolderRewardAlice}>Update Holder Reward for Alice</button>
 
 
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
             <div className="mt-2 flex flex-row">
-              <label className='mx-4 mt-4'>Subscription Denom</label>
-              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomAlice} onChange={e => setSubscribeDenomAlice(e.target.value)}/>
-              <label className='mx-4 mt-4'>Subscription Amount</label>
-              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountAlice} onChange={e => setSubscribeAmountAlice(e.target.value)}/>
+              <label className='mx-4 mt-4'>Bond Stake Denom</label>
+              <input className='w-16 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={bondStakeDenomAlice} onChange={e => setbondStakeDenomAlice(e.target.value)}/>
+              <label className='mx-4 mt-4'>Bond Stake Amount</label>
+              <input className='w-28 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={bondStakeAmountAlice} onChange={e => setbondStakeAmountAlice(e.target.value)}/>
             </div>
           </div>
           <div className="w-full flex flex-col mr-2">
             <div className="overflow-auto p-2 w-full text-lg text-orange-800 border-2 border-black h-full font-mono">
-                <pre>{positionRick}</pre>
+                <pre>{holderResponseRick}</pre>
             </div>
             <div className="flex flex-row">
-              <button className="w-[100px] border-2 rounded-sm" onClick={queryPositionRick}>Query Rick's Position</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={subscribeRick}>Subscribe for Rick</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawRick}>Withdraw for Rick</button>
-              <button className="w-[100px] border-2 rounded-sm" onClick={exitStreamRick}>Exit Stream for Rick</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={queryHolderRick}>Query Holder for Rick</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={bondStakeRick}>Bond Stake for Rick</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={withdrawRick}>Withdraw Stake for Rick</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={receiveRewardRick}>Receive Reward for Rick</button>
+              <button className="w-[100px] border-2 rounded-sm" onClick={updateHolderRewardRick}>Update Holder Reward for Rick</button>
+
 
               {/* <button title="Withdraw" onClick={withdrawBob}/>
               <button title="Exit Stream" onClick={exitBob}/> */}
             </div>
             <div className="mt-2 flex flex-row">
-              <label className='mx-4 mt-4'>Subscription Denom</label>
-              <input className='w-12 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeDenomRick} onChange={e => setSubscribeDenomRick(e.target.value)}/>
-              <label className='mx-4 mt-4'>Subscription Amount</label>
-              <input className='w-24 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={subscribeAmountRick} onChange={e => setSubscribeAmountRick(e.target.value)}/>
+              <label className='mx-4 mt-4'>Bond Stake Denom</label>
+              <input className='w-16 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={bondStakeDenomRick} onChange={e => setbondStakeDenomRick(e.target.value)}/>
+              <label className='mx-4 mt-4'>Bond Stake Amount</label>
+              <input className='w-28 h-12 border-2 border-black overflow-scroll overflow-x-auto' type="text" value={bondStakeAmountRick} onChange={e => setbondStakeAmountRick(e.target.value)}/>
             </div>
           </div>
           
         </div>
+        <label className='mt-2 underline'>Contracts instantiated with the Code Id of {codeId}</label>
+              {contracts.map((contract, index) => (
+                <div key={index}>
+                  <span className="text-lg">{contract}</span>
+                </div>
+              ))}
   
       </div>
       </div>
