@@ -149,6 +149,21 @@ const main = async () => {
   // )
   // console.log(JSON.parse(new TextDecoder().decode(res as Uint8Array)).token_uri)
 
+  // let rm_res = await client.queryContractRaw(
+  //   "stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr",
+  //   toUtf8(
+  //     Buffer.from(
+  //       "0002" +
+  //         Buffer.from("rm").toString("hex") +
+  //         Buffer.from("stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3").toString(
+  //           "hex"
+  //         ),
+  //       "hex"
+  //     ).toString()
+  //   )
+  // )
+  // console.log(JSON.parse(new TextDecoder().decode(rm_res as Uint8Array)))
+
   // let res = await client.queryContractRaw(
   //   "juno19j78q9l3zqm6c4mavyv0j055xcm48ust80y5lrznax4jt43rpkmsz8zl7s",
   //   toUtf8(
