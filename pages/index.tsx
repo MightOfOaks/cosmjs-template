@@ -26,7 +26,7 @@ import { resolve } from "path";
   const IS_TESTNET = !process.argv.includes("--mainnet");
   
   const MAINNET_RPC = "https://rpc.juno-1.deuslabs.fi";
-  const TESTNET_RPC = "https://rpc-test.osmosis.zone";
+  const TESTNET_RPC = "https://rpc-test.osmosis.zone:443";
   
   
   const Home: NextPage = () => {
@@ -69,7 +69,7 @@ import { resolve } from "path";
   //query params
   const [streamId , setStreamId] = useState(1);
   const [height , setHeight] = useState<any>();
-  const [codeId , setCodeId] = useState(5148);
+  const [codeId , setCodeId] = useState(5150);
   const [treasuryBalance , setTreasuryBalance] = useState<any>();
   const [bobBalance , setBobBalance] = useState<any>();
   const [aliceBalance , setAliceBalance] = useState<any>();
