@@ -104,15 +104,15 @@ const main = async () => {
   //   }
   
   // const msg = {
-  //   owner: 'juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5',
-  //   cw20_token_address: 'juno1ryny53rjvqhzhusv3aczw5rx8ehs26m9d243hekm3hkkcdcgf5tq038sr3',
-  //   native_token: null
+  //   escrow_amount: '1000000',
+  //   allowed_native: 'ujunox',
+  //   release_height_delta: '360'
   // }
 
-  // const label = 'T0142 Test'
+  // const label = 'Escrow Contract'
   // const response = await client.instantiate(
   //   'juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5',
-  //   1356,
+  //   34,
   //   msg,
   //   label,
   //   "auto"
