@@ -10,7 +10,7 @@ import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
-const JUNO_MAINNET_RPC = "https://rpc.stargaze-apis.com/"
+const JUNO_MAINNET_RPC = "https://rpc.stargaze-apis.com"
 const JUNO_TESTNET_RPC = "https://rpc.elgafar-1.stargaze-apis.com/"
 
 const MNEMONIC = 
@@ -52,11 +52,11 @@ const main = async () => {
   )
   console.log((await signer.getAccounts())[0].address)
 
-  const data = await client.queryContractRaw(
-    "stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr",
-    toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
-  )
-  console.log(JSON.parse(new TextDecoder().decode(data as Uint8Array)))
+  // const data = await client.queryContractRaw(
+  //   "stars1z2rrg4jdhlt2ppjjfkn5y3rurfp5h720zdqtdnatc5t9v6d2c28sv0rld2",
+  //   toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+  // )
+  // console.log(JSON.parse(new TextDecoder().decode(data as Uint8Array)))
 
   //client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1fvpmck9vtf2ys85zvtud2ss5pr63sh0th3yf32072g7s23emk5vs4u4lve', 1174, {}, 'auto')
   // console.log(await client.getContracts(1268))
@@ -111,7 +111,7 @@ const main = async () => {
   // const msg = {
   //   params:{
   //     code_id: 613,
-  //     creation_fee: {amount: "1000000000", denom:"ustars"},
+  //     creation_fee: {amount: "3000000000", denom:"ustars"},
   //     min_mint_price: {amount: "50000000", denom:"ustars"},
   //     mint_fee_bps: 10,
   //     max_trading_offset_secs: 86400,
@@ -132,6 +132,19 @@ const main = async () => {
 
   // console.log(response)
 
+  // SMART QUERY
+  // const name = await client.queryContractSmart("stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr", {
+  //   name: { address: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3" },
+  // });
+  
+  // console.log("name:", name);
+
+  // const address = await client.queryContractSmart("stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr", {
+  //   associated_address: { name: "serkan" },
+  // });
+  
+  // console.log("address:", address);
+
   // RAW QUERY
   // console.log(Buffer.from("balance").toString("hex"))
   // let res = await client.queryContractRaw(
@@ -148,6 +161,7 @@ const main = async () => {
   //   )
   // )
   // console.log(JSON.parse(new TextDecoder().decode(res as Uint8Array)).token_uri)
+
 
   // let rm_res = await client.queryContractRaw(
   //   "stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr",
