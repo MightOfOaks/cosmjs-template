@@ -110,21 +110,26 @@ const main = async () => {
 
   // const msg = {
   //   params:{
-  //     code_id: 613,
+  //     code_id: 1701,
   //     creation_fee: {amount: "3000000000", denom:"ustars"},
   //     min_mint_price: {amount: "50000000", denom:"ustars"},
-  //     mint_fee_bps: 10,
-  //     max_trading_offset_secs: 86400,
-  //     extension: null,
+  //     mint_fee_bps: 1000,
+  //     max_trading_offset_secs: 1209600,
+  //     extension: {
+  //       max_token_limit: 10000,
+  //       max_per_address_limit: 50,
+  //       airdrop_mint_price: {amount: "0", denom:"ustars"},
+  //       airdrop_mint_fee_bps: 0,
+  //       shuffle_fee: {amount: "100000000", denom:"ustars"},
+  //     },
   //   }
-
   // }
   
-  // const label = 'Base Factory init'
+  // const label = 'Vending Factory init'
   // let senderAddress = (await signer.getAccounts())[0].address
   // const response = await client.instantiate(
   //  senderAddress,
-  //   612,
+  //   1700,
   //   msg,
   //   label,
   //   "auto"
@@ -193,8 +198,8 @@ const main = async () => {
   
   // Query Balance
 
-  // const result = await client.queryContractSmart("stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr", {
-  //     nft_info: {token_id: "serkan" },
+  // const result = await client.queryContractSmart("stars1lwevnmljld52uxvlecprn03t5mmzj4fl69mw29df9ve6py8uy95q2z8mxu", {
+  //     params:{},
   // })
   // console.log(result)
   
