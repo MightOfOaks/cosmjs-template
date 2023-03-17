@@ -108,34 +108,35 @@ const main = async () => {
   //   //   },
   //   }
 
-  // const msg = {
-  //   params:{
-  //     code_id: 1701,
-  //     creation_fee: {amount: "3000000000", denom:"ustars"},
-  //     min_mint_price: {amount: "50000000", denom:"ustars"},
-  //     mint_fee_bps: 1000,
-  //     max_trading_offset_secs: 1209600,
-  //     extension: {
-  //       max_token_limit: 10000,
-  //       max_per_address_limit: 50,
-  //       airdrop_mint_price: {amount: "0", denom:"ustars"},
-  //       airdrop_mint_fee_bps: 0,
-  //       shuffle_fee: {amount: "100000000", denom:"ustars"},
-  //     },
-  //   }
-  // }
+  const msg = {
+    params:{
+      allowed_sg721_code_ids: [1912],
+      code_id: 1910,
+      creation_fee: {amount: "3000000000", denom:"ustars"},
+      min_mint_price: {amount: "50000000", denom:"ustars"},
+      mint_fee_bps: 1000,
+      max_trading_offset_secs: 1209600,
+      // extension: {
+      //   max_token_limit: 10000,
+      //   max_per_address_limit: 50,
+      //   airdrop_mint_price: {amount: "0", denom:"ustars"},
+      //   airdrop_mint_fee_bps: 0,
+      //   shuffle_fee: {amount: "100000000", denom:"ustars"},
+      // },
+    }
+  }
   
-  // const label = 'Vending Factory init'
-  // let senderAddress = (await signer.getAccounts())[0].address
-  // const response = await client.instantiate(
-  //  senderAddress,
-  //   1700,
-  //   msg,
-  //   label,
-  //   "auto"
-  // )
+  const label = 'Base Factory init'
+  let senderAddress = (await signer.getAccounts())[0].address
+  const response = await client.instantiate(
+   senderAddress,
+    1908,
+    msg,
+    label,
+    "auto"
+  )
 
-  // console.log(response)
+  console.log(response)
 
   // SMART QUERY
   // const name = await client.queryContractSmart("stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr", {
