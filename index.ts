@@ -7,6 +7,7 @@ import { fromHex, toBase64, toUtf8 } from "@cosmjs/encoding"
 import { getSigner, getLedgerSigner } from "./wallet"
 import { coin, makeCosmoshubPath, coins } from '@cosmjs/amino';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
+import axios from "axios"
 
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
@@ -53,14 +54,16 @@ const main = async () => {
   console.log((await signer.getAccounts())[0].address)
 
   // const data = await client.queryContractRaw(
-  //   "stars1z2rrg4jdhlt2ppjjfkn5y3rurfp5h720zdqtdnatc5t9v6d2c28sv0rld2",
+  //   "stars1w57up6s60r0ueshsprva3vyjtv8e49lf6auph5g7h95q9fqm87nqqk38pm",
   //   toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
   // )
   // console.log(JSON.parse(new TextDecoder().decode(data as Uint8Array)))
-
-  //client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1fvpmck9vtf2ys85zvtud2ss5pr63sh0th3yf32072g7s23emk5vs4u4lve', 1174, {}, 'auto')
+  // let res1 = await client.getContracts(2681)
+  // console.log(res1)
+  // client.migrate('juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5', 'juno1fvpmck9vtf2ys85zvtud2ss5pr63sh0th3yf32072g7s23emk5vs4u4lve', 1174, {}, 'auto')
   // console.log(await client.getContracts(1268))
-  // console.log(await client.getContractCodeHistory("juno143rmxg4khjkxzk56pd3tru6wapenwls20y3shahlc5p9zgddyk8q27n0k4"))
+  // let res = await client.getContractCodeHistory("stars1w57up6s60r0ueshsprva3vyjtv8e49lf6auph5g7h95q9fqm87nqqk38pm")
+  // console.log(res)
   // console.log(await client.getContract("juno1mfx2wy7g87mv42mnvrqktplggqwqh7phvehk7sfpamgrqvzmln0qkkulak"))
   
   // console.log(await client.getCodeDetails(752))
@@ -108,35 +111,97 @@ const main = async () => {
   //   //   },
   //   }
 
-  const msg = {
-    params:{
-      allowed_sg721_code_ids: [1912],
-      code_id: 1910,
-      creation_fee: {amount: "3000000000", denom:"ustars"},
-      min_mint_price: {amount: "50000000", denom:"ustars"},
-      mint_fee_bps: 1000,
-      max_trading_offset_secs: 1209600,
-      // extension: {
-      //   max_token_limit: 10000,
-      //   max_per_address_limit: 50,
-      //   airdrop_mint_price: {amount: "0", denom:"ustars"},
-      //   airdrop_mint_fee_bps: 0,
-      //   shuffle_fee: {amount: "100000000", denom:"ustars"},
-      // },
-    }
-  }
+  // const msg = {
+  //   params:{
+  //     allowed_sg721_code_ids: [2659],
+  //     code_id: 2667,
+  //     frozen: false,
+  //     creation_fee: {amount: "20000000000", denom:"ustars"},
+  //     min_mint_price: {amount: "0", denom:"ustars"},
+  //     mint_fee_bps: 500,
+  //     max_trading_offset_secs: 1209600,
+  //     extension: {
+  //       max_token_limit: 10000,
+  //       max_per_address_limit: 50,
+  //       airdrop_mint_price: {amount: "0", denom:"ustars"},
+  //       airdrop_mint_fee_bps: 10000,
+  //       shuffle_fee: {amount: "500000000", denom:"ustars"},
+  //     },
+  //   }
+  // }
   
-  const label = 'Base Factory init'
-  let senderAddress = (await signer.getAccounts())[0].address
-  const response = await client.instantiate(
-   senderAddress,
-    1908,
-    msg,
-    label,
-    "auto"
-  )
+  // const label = 'Vending Factory Flex'
+  // let senderAddress = (await signer.getAccounts())[0].address
+  // const response = await client.instantiate(
+  //  senderAddress,
+  //   2665,
+  //   msg,
+  //   label,
+  //   "auto"
+  // )
 
-  console.log(response)
+  // console.log(response)
+
+  // const msg = {
+  //   params:{
+  //     allowed_sg721_code_ids: [2661],
+  //     code_id: 2664,
+  //     frozen: false,
+  //     creation_fee: {amount: "2250000000", denom:"ustars"},
+  //     min_mint_price: {amount: "50000000", denom:"ustars"},
+  //     mint_fee_bps: 10000,
+  //     max_trading_offset_secs: 0,
+  //     // extension: {
+  //     //   max_token_limit: 10000,
+  //     //   max_per_address_limit: 50,
+  //     //   airdrop_mint_price: {amount: "0", denom:"ustars"},
+  //     //   airdrop_mint_fee_bps: 10000,
+  //     //   shuffle_fee: {amount: "500000000", denom:"ustars"},
+  //     // },
+  //   }
+  // }
+  
+  // const label = 'Base Factory Updatable'
+  // let senderAddress = (await signer.getAccounts())[0].address
+  // const response = await client.instantiate(
+  //  senderAddress,
+  //   2663,
+  //   msg,
+  //   label,
+  //   "auto"
+  // )
+
+  // console.log(response)
+
+  // const msg = {
+  //   params:{
+  //     allowed_sg721_code_ids: [2659],
+  //     code_id: 2656,
+  //     frozen: false,
+  //     creation_fee: {amount: "1000000000", denom:"ustars"},
+  //     min_mint_price: {amount: "50000000", denom:"ustars"},
+  //     mint_fee_bps: 500,
+  //     max_trading_offset_secs: 604800,
+  //     extension: {
+  //       max_per_address_limit: 50,
+  //       airdrop_mint_price: {amount: "10000000", denom:"ustars"},
+  //       airdrop_mint_fee_bps: 10000,
+  //       dev_fee_address: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3",
+  //     },
+  //   }
+  // }
+  
+  // const label = 'Open Edition Factory'
+  // let senderAddress = (await signer.getAccounts())[0].address
+  // const response = await client.instantiate(
+  //  senderAddress,
+  //   2654,
+  //   msg,
+  //   label,
+  //   "auto"
+  // )
+
+  // console.log(response)
 
   // SMART QUERY
   // const name = await client.queryContractSmart("stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr", {
@@ -199,10 +264,18 @@ const main = async () => {
   
   // Query Balance
 
-  // const result = await client.queryContractSmart("stars1lwevnmljld52uxvlecprn03t5mmzj4fl69mw29df9ve6py8uy95q2z8mxu", {
+  // const result = await client.queryContractSmart("stars1hvu2ghqkcnvhtj2fc6wuazxt4dqcftslp2rwkkkcxy269a35a9pq60ug2q", {
   //     params:{},
   // })
-  // console.log(result)
+  // console.log(result.params)
+
+  // const feeRateRaw = await client.queryContractRaw(
+  //   "stars13unm9tgtwq683wplupjlgw39nghm7xva7tmu7m29tmpxxnkhpkcq4gf3p4",
+  //   toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
+  // )
+  // console.log('Fee Rate Raw: ', feeRateRaw)
+  // const feeRate = JSON.parse(new TextDecoder().decode(feeRateRaw as Uint8Array))
+  // console.log('Fee Rate: ', feeRate)
   
   // const utf8Encode = new TextEncoder();
   // let rawMessage = Buffer.from("0006636f6e666967","hex").toString();
@@ -280,28 +353,38 @@ const main = async () => {
   //Create Lockbox
   
   // const executeResponse = await client.execute(
-  //     "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
-  //     "juno1d2rce675x6apuhz3ceve8xg69vprvexw5y5un93n87rfm8ymzjpq358ldy",
+  //     "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e",
+  //     "stars1w5tn8z88keqlfd60fal8n68efxaws689846z4mrucw7vhp4av62swvrel5",
   //     {
-  //       create_lockbox: {
-  //         owner: "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
-  //         claims: [
-  //           {
-  //             addr: "juno1dc5yv2w2plccmxxh6szden8kqkshqjgkeqkg74",
-  //             amount: "30"
-  //           },
-  //           {
-  //             addr: "juno153w5xhuqu3et29lgqk4dsynj6gjn96lrnl6qe5",
-  //             amount: "20"
-  //           }
-  //         ],
-  //         expiration: {at_height: 1820900},
-  //         cw20_addr: "juno1z4chusdz400jydm7vcpurkpxrm0hfkj8pessnuyvpjn3p37s34yq8wxsyu",
-  //       }
+  //       mint:{}
   //     },
   //     "auto",
+  //         '',
+  //     [coin(55000000, "ustars")]
+      
   //   )
   //   console.log(executeResponse)
+
+  // const endpoint = "https://constellations-api.mainnet.stargaze-apis.com/graphql"
+
+  // axios({
+  //   url: endpoint,
+  //   method: 'post',
+  //   data: {
+  //     query: `
+  //       query Collections {
+  //         collections(tokenOwnerAddr: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3", limit: 100) {
+  //           collections {
+  //             collectionAddr
+  //             name
+  //           }
+  //         }
+  //       }
+  //       `
+  //   }
+  // }).then((result) => {
+  //   console.log(result.data.data.collections)
+  // });
 
 
   // const executeResponse = await client.execute(
