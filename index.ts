@@ -1,13 +1,22 @@
+import { Timestamp } from "cosmjs-types/google/protobuf/timestamp";
 import { CosmWasmClient, SigningCosmWasmClient,  } from "@cosmjs/cosmwasm-stargate"
 import { GasPrice } from "@cosmjs/stargate"
 import { DirectSecp256k1HdWallet, EncodeObject } from "@cosmjs/proto-signing"
 import { LedgerSigner } from "@cosmjs/ledger-amino"
-import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx"
 import { fromHex, toBase64, toUtf8 } from "@cosmjs/encoding"
 import { getSigner, getLedgerSigner } from "./wallet"
 import { coin, makeCosmoshubPath, coins } from '@cosmjs/amino';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 import axios from "axios"
+import type { MsgExecuteContractEncodeObject } from '@cosmjs/cosmwasm-stargate'
+import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
+import { MsgGrant, MsgExec, MsgRevoke } from "cosmjs-types/cosmos/authz/v1beta1/tx";
+import { fromRfc3339WithNanoseconds } from "@cosmjs/tendermint-rpc";
+import Long from "long";
+import { SendAuthorization } from "cosmjs-types/cosmos/bank/v1beta1/authz";
+import { AcceptedMessageKeysFilter, AllowAllMessagesFilter, ContractExecutionAuthorization, MaxFundsLimit, } from "cosmjs-types/cosmwasm/wasm/v1/authz";
+import { AuthzExtension } from "@cosmjs/stargate/build/modules/authz/queries";
+import { AminoMsgExecuteContract } from "@cosmjs/cosmwasm-stargate/build/modules";
 
 const IS_TESTNET = !process.argv.includes("--mainnet")
 
@@ -15,10 +24,10 @@ const JUNO_MAINNET_RPC = "https://rpc.stargaze-apis.com"
 const JUNO_TESTNET_RPC = "https://rpc.elgafar-1.stargaze-apis.com/"
 
 const MNEMONIC = 
-//stargaze test "wait boring drastic roast ranch close prefer sibling total across faint empty"
+"wait boring drastic roast ranch close prefer sibling total across faint empty"
 //"olive hamster circle beyond parent lab cup million manual someone kiss acquire ginger layer valley gorilla repair mandate actress organ domain siren fuel else"
 //"alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
-"chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
+//"chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
 //"anger ivory inside rocket reopen long flee jump elite wear negative distance income involve lobster boil panel champion reflect horse dial lion doctor prosper"
 //"track huge holiday father slice combine all canal harbor grunt hub keen badge faint victory achieve forum december quiz topple improve island small logic"
 
@@ -47,7 +56,6 @@ const main = async () => {
     IS_TESTNET ? JUNO_TESTNET_RPC : JUNO_MAINNET_RPC,
     signer,
     {
-      prefix: "stars",
       gasPrice: GasPrice.fromString("0.025ustars"),
     }
   )
@@ -113,29 +121,29 @@ const main = async () => {
 
   // const msg = {
   //   params:{
-  //     allowed_sg721_code_ids: [2659],
-  //     code_id: 2667,
+  //     allowed_sg721_code_ids: [2596],
+  //     code_id: 2776,
   //     frozen: false,
-  //     creation_fee: {amount: "20000000000", denom:"ustars"},
-  //     min_mint_price: {amount: "0", denom:"ustars"},
+  //     creation_fee: {amount: "5000000000", denom:"ustars"},
+  //     min_mint_price: {amount: "10000000", denom:"factory/stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3/uusdc"},
   //     mint_fee_bps: 500,
   //     max_trading_offset_secs: 1209600,
   //     extension: {
   //       max_token_limit: 10000,
   //       max_per_address_limit: 50,
-  //       airdrop_mint_price: {amount: "0", denom:"ustars"},
+  //       airdrop_mint_price: {amount: "0", denom:"factory/stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3/uusdc"},
   //       airdrop_mint_fee_bps: 10000,
   //       shuffle_fee: {amount: "500000000", denom:"ustars"},
   //     },
   //   }
   // }
   
-  // const label = 'Vending Factory Flex'
+  // const label = 'Vending Factory USDC Updatable'
   // let senderAddress = (await signer.getAccounts())[0].address
   // const response = await client.instantiate(
   //  senderAddress,
-  //   2665,
-  //   msg,
+  //   80,
+  //   {},
   //   label,
   //   "auto"
   // )
@@ -173,39 +181,275 @@ const main = async () => {
 
   // console.log(response)
 
-  // const msg = {
-  //   params:{
-  //     allowed_sg721_code_ids: [2659],
-  //     code_id: 2656,
-  //     frozen: false,
-  //     creation_fee: {amount: "1000000000", denom:"ustars"},
-  //     min_mint_price: {amount: "50000000", denom:"ustars"},
-  //     mint_fee_bps: 500,
-  //     max_trading_offset_secs: 604800,
-  //     extension: {
-  //       max_per_address_limit: 50,
-  //       airdrop_mint_price: {amount: "10000000", denom:"ustars"},
-  //       airdrop_mint_fee_bps: 10000,
-  //       dev_fee_address: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3",
-  //     },
-  //   }
-  // }
+  const msg = {
+    params:{
+      allowed_sg721_code_ids: [2595],
+      code_id: 3109,
+      frozen: false,
+      creation_fee: {amount: "1000000000", denom:"ustars"},
+      min_mint_price: {amount: "0", denom:"factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/ufrienzies"},
+      mint_fee_bps: 500,
+      max_trading_offset_secs: 604800,
+      extension: {
+        max_per_address_limit: 50,
+        airdrop_mint_price: {amount: "100000", denom:"factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/ufrienzies"},
+        airdrop_mint_fee_bps: 10000,
+        dev_fee_address: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3",
+      },
+    }
+  }
   
-  // const label = 'Open Edition Factory'
-  // let senderAddress = (await signer.getAccounts())[0].address
-  // const response = await client.instantiate(
-  //  senderAddress,
-  //   2654,
-  //   msg,
-  //   label,
-  //   "auto"
+  const label = 'Open Edition FRNZ Factory'
+  let senderAddress = (await signer.getAccounts())[0].address
+  const response = await client.instantiate(
+   senderAddress,
+    3108,
+    msg,
+    label,
+    "auto"
+  )
+
+  console.log(response)
+
+  // AUTHZ
+
+  // const expWithNano = fromRfc3339WithNanoseconds("1693934838000000000");
+  // let expSec = Math.floor(expWithNano.getTime() / 1000);
+  // let expNano =
+  //   (expWithNano.getTime() % 1000) * 1000000 + (expWithNano.nanoseconds ?? 0);
+  // const exp = Timestamp.fromPartial({
+  //   nanos: expNano,
+  //   seconds: Long.fromNumber(expSec),
+  // });
+
+  const authValue = ContractExecutionAuthorization.encode({
+    grants: [{
+        contract: "stars1vjd4ue5ymd25fphyqmck7urwynnvun29cdqsgjd2nzvdtwtlj4xsxg8f08",
+        filter: {
+            typeUrl: "/cosmwasm.wasm.v1.AllowAllMessagesFilter",
+            value: AllowAllMessagesFilter.encode({}).finish(),
+        },
+        limit: {
+            typeUrl: "/cosmwasm.wasm.v1.MaxFundsLimit",
+            value: MaxFundsLimit.encode({
+                amounts: coins("10000000000", "ustars"),
+            }).finish(),
+        },
+    }],
+}).finish()
+
+  const currentTimeInMilliSeconds = new Date().getTime();
+
+  const grantValue = MsgGrant.fromPartial({
+    grant: {
+      authorization: {
+        typeUrl: "/cosmwasm.wasm.v1.ContractExecutionAuthorization",
+        value: authValue,
+      },
+      expiration: {seconds: 1696508268},
+    },
+    granter: "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e",
+    grantee: "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+  });
+
+  // const res = await client.signAndBroadcast(
+  //   "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e",
+  //   [
+  //     {
+  //       typeUrl: '/cosmos.authz.v1beta1.MsgGrant',
+  //       value: grantValue,
+  //     },
+  //   ],
+  //   'auto',
+  // )
+
+  // console.log(res)
+ 
+  // const msg = {
+  //   mint_to: { recipient: "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e"}
+  // }
+
+  // interface MsgExecAllowanceEncodeObject extends EncodeObject {
+  //   readonly typeUrl: "/cosmos.authz.v1beta1.MsgExec";
+  //   readonly value: Partial<MsgExec>;
+  // }
+ 
+  // const authzExecuteContractMsg: MsgExecAllowanceEncodeObject  = {
+  //   typeUrl: "/cosmos.authz.v1beta1.MsgExec",
+  //   value: MsgExec.fromPartial({
+  //           grantee: "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+  //           msgs: [{
+  //             typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+  //             value: MsgExecuteContract.encode({
+  //               sender: "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e",
+  //               contract: "stars1vjd4ue5ymd25fphyqmck7urwynnvun29cdqsgjd2nzvdtwtlj4xsxg8f08",
+  //               msg: toUtf8(JSON.stringify(msg)),
+  //               funds: [],
+  //             }).finish(),
+  //           }],
+  //       }),
+  // }
+
+  // const response = await client.signAndBroadcast(
+  //   "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+  //   [authzExecuteContractMsg],
+  //   'auto',
   // )
 
   // console.log(response)
 
+  //NAMES
+  // const msg = {
+  //   collection_code_id: 2962,
+  //   admin: "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e",
+  //   marketplace_addr: "stars1fn2fpunzvees5wpaxrcfnpxp4vsxn96jv2lxnsth0q0ddmmy632swuh99s",
+  //   min_name_length: 3,
+  //   max_name_length: 63,
+  //   base_price: "100000000",
+  //   fair_burn_bps: 6666,
+  //   whitelists: [],
+  //   verifier: "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e"
+  // }
+  
+  // const label = 'Name Minter'
+  // let senderAddress = (await signer.getAccounts())[0].address
+  // const response = await client.instantiate(
+  //  senderAddress,
+  //   2961,
+  //   msg,
+  //   label,
+  //   "auto"
+  // )
+  
+  // console.log(response.contractAddress)
+  // console.log(JSON.stringify(response.logs[0].events))
+  
+  // const msg = {
+  //   associate_address: {
+  //     name: "nametotest",
+  //     address: "stars1exgwcgu85czk3xpkwzv258thqxw7qrpyupkl7s7u2ranttec9fws37j2gs"
+  //   }
+  // }
+  
+  // let senderAddress = (await signer.getAccounts())[0].address
+  // const response = await client.execute(
+    //  senderAddress,
+  //   "stars1gmdsq08cg4mvxwd8v7h5ewa3ee2v8wd89f30vylyhnhpld8l27cq3lmm8g",
+  //   msg,
+  //   "auto",
+  // )
+  
+  // console.log(response)
+  
+  //STAKING PROGRAM
+  
+  // const executeResponse = await client.execute(
+    //     "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+    //     "stars1wcplnd8979nd88kelpr8lwwygan47n39l7aksdh7angm4rfk47wsa5f6t4",
+    //     {
+    //       update_tiers:{tiers: ["1000000000","2000000000","3000000000"]}
+    //     },
+    //     "auto",
+    //     '',      
+    //   )
+    //   console.log(executeResponse)
+      
+    // const vip_minter_init_msg = {
+    //   collection_code_id: 3059,
+    //   update_interval: 50,
+    // }
+
+    // const vip_program_init_msg = {
+    //   collection: "stars1vdax2s4yncc6jrz4fck9v459w7t8znk7d0yqnlj22j3cz8lvhrxqfq4d4j",
+    //   tiers: ["1000","2000","3000"]
+    // }
+
+
+  
+  // const label = 'VIP Program'
+  // let senderAddress = (await signer.getAccounts())[0].address
+  // const response = await client.instantiate(
+  //  senderAddress,
+  //   3053,
+  //   vip_program_init_msg,
+  //   label,
+  //   "auto",
+  //   {
+  //     admin: "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz"
+  //   }
+  // )
+  
+  // console.log(response)
+  // console.log(response.contractAddress)
+  // console.log(JSON.stringify(response.logs[0].events))
+
+  // const executeResponse = await client.execute(
+  //     "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+  //     "stars1w0enyklvdv5ux5dnmj3wnc66v580tcvxw6r9rp6psly6z2p8udxqslw836",
+  //     {
+  //       update:{token_id: 3}
+  //     },
+  //     "auto",
+  //     '',      
+  //   )
+  //   console.log(executeResponse)
+
+  //stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz
+  //stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e
+    // const tier = await client.queryContractSmart("stars1wcplnd8979nd88kelpr8lwwygan47n39l7aksdh7angm4rfk47wsa5f6t4", {
+    //   tier: { address: "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e" },
+    // });
+
+    // console.log("Tier: ", tier)
+
+  // FRENS PARTY
+    // const frens_factory_init_msg = {
+    // protocol_fee_destination: "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+    // protocol_fee_bps: 5000,
+    // creator_fee_bps: 5000,
+    // max_supply: 500,
+    // curve_coefficient: "0.05",
+    // minter_code_id: 3088,
+    // collection_code_id: 3089,
+    // base_url: "ipfs://test",
+    // }
+
+    // const label = 'Frens Factory'
+    // let senderAddress = (await signer.getAccounts())[0].address
+    // const response = await client.instantiate(
+    //  senderAddress,
+    //   3087,
+    //   frens_factory_init_msg,
+    //   label,
+    //   "auto",
+    //   {
+    //     admin: "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz"
+    //   }
+    // )
+
+    // console.log(response)
+
+      // const executeResponse = await client.execute(
+      //     "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+      //     "stars1fxxs5sm77d6pkg3zf887kqjzugj5900uv40ua6mx7shkgmt0ch3s999cyz",
+      //     {
+      //       mint:{}
+      //     },
+      //     "auto",
+      //     '',
+      //     coins(1000000, "ustars")     
+      //   )
+      //   console.log(JSON.stringify(executeResponse))
+
+
+
   // SMART QUERY
-  // const name = await client.queryContractSmart("stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr", {
-  //   name: { address: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3" },
+  // const name = await client.queryContractSmart("stars138t6zjcrw943gtgahfpfl7k8z5t6hgvw3kk8nhqylw36asd3fw7qs2thmt", {
+  //   num_tokens: { },
+  // });
+
+  // const name = await client.queryContractSmart("stars1gmdsq08cg4mvxwd8v7h5ewa3ee2v8wd89f30vylyhnhpld8l27cq3lmm8g", {
+  //   associated_address: { name: "nametotest" },
   // });
   
   // console.log("name:", name);
