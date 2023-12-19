@@ -2,9 +2,8 @@ import { Timestamp } from "cosmjs-types/google/protobuf/timestamp";
 import { CosmWasmClient, SigningCosmWasmClient,  } from "@cosmjs/cosmwasm-stargate"
 import { GasPrice } from "@cosmjs/stargate"
 import { DirectSecp256k1HdWallet, EncodeObject } from "@cosmjs/proto-signing"
-import { LedgerSigner } from "@cosmjs/ledger-amino"
 import { fromHex, toBase64, toUtf8 } from "@cosmjs/encoding"
-import { getSigner, getLedgerSigner } from "./wallet"
+import { getSigner } from "./wallet"
 import { coin, makeCosmoshubPath, coins } from '@cosmjs/amino';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 import axios from "axios"
@@ -24,12 +23,12 @@ const JUNO_MAINNET_RPC = "https://rpc.stargaze-apis.com"
 const JUNO_TESTNET_RPC = "https://rpc.elgafar-1.stargaze-apis.com/"
 
 const MNEMONIC = 
-"wait boring drastic roast ranch close prefer sibling total across faint empty"
-//"olive hamster circle beyond parent lab cup million manual someone kiss acquire ginger layer valley gorilla repair mandate actress organ domain siren fuel else"
-//"alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
-//"chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
-//"anger ivory inside rocket reopen long flee jump elite wear negative distance income involve lobster boil panel champion reflect horse dial lion doctor prosper"
-//"track huge holiday father slice combine all canal harbor grunt hub keen badge faint victory achieve forum december quiz topple improve island small logic"
+// "wait boring drastic roast ranch close prefer sibling total across faint empty"
+// "olive hamster circle beyond parent lab cup million manual someone kiss acquire ginger layer valley gorilla repair mandate actress organ domain siren fuel else"
+// "alarm awful problem wage syrup source van engage pact drill virtual mansion category ice dynamic alone begin employ mention flower wheel flag boy movie"
+"chest jungle ring glad bounce purse soup saddle prize tongue ride ginger flavor volume news private donor report action twice roast useful lion leopard"
+// "anger ivory inside rocket reopen long flee jump elite wear negative distance income involve lobster boil panel champion reflect horse dial lion doctor prosper"
+// "track huge holiday father slice combine all canal harbor grunt hub keen badge faint victory achieve forum december quiz topple improve island small logic"
 
 const CONTRACT_ADDRESS = 
   // "stars10t2y7f9m0twpsrz3kvfp55nlgzc86kace2se3uarkv380h3pk6qq5cnvr9"
@@ -39,7 +38,7 @@ const CONTRACT_ADDRESS =
   //"juno1ke559k9wh8akdrtf7nyv465c047nt6hpcg0ntfke6c4s2s74kses6recpp"
   "stars134d6rrhpwjtz356t42553tlc6gpqcm82nzv0xc5klshm2x4p6vxs95yw3k"
 
-let signer: DirectSecp256k1HdWallet | LedgerSigner
+let signer: DirectSecp256k1HdWallet
 let client: SigningCosmWasmClient
 
 const querySmartContract = async (message: Record<string, unknown>) => {
@@ -48,8 +47,7 @@ const querySmartContract = async (message: Record<string, unknown>) => {
 
 const main = async () => {
   /* SIGNER INIT */
-  if (process.argv.includes("--ledger")) signer = await getLedgerSigner()
-  else signer = await getSigner(MNEMONIC)
+  signer = await getSigner(MNEMONIC)
 
   /* CLIENT INIT */
   client = await SigningCosmWasmClient.connectWithSigner(
@@ -60,6 +58,9 @@ const main = async () => {
     }
   )
   console.log((await signer.getAccounts())[0].address)
+
+  // const info = await client.getCodes()
+  // console.log(JSON.stringify(info))
 
   // const data = await client.queryContractRaw(
   //   "stars1w57up6s60r0ueshsprva3vyjtv8e49lf6auph5g7h95q9fqm87nqqk38pm",
@@ -121,35 +122,35 @@ const main = async () => {
 
   // const msg = {
   //   params:{
-  //     allowed_sg721_code_ids: [2596],
+  //     allowed_sg721_code_ids: [2595],
   //     code_id: 2776,
   //     frozen: false,
-  //     creation_fee: {amount: "5000000000", denom:"ustars"},
-  //     min_mint_price: {amount: "10000000", denom:"factory/stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3/uusdc"},
+  //     creation_fee: {amount: "3000000000", denom:"ustars"},
+  //     min_mint_price: {amount: "1000000", denom:"factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uhuahua"},
   //     mint_fee_bps: 500,
   //     max_trading_offset_secs: 1209600,
   //     extension: {
   //       max_token_limit: 10000,
   //       max_per_address_limit: 50,
-  //       airdrop_mint_price: {amount: "0", denom:"factory/stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3/uusdc"},
+  //       airdrop_mint_price: {amount: "0", denom:"factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uhuahua"},
   //       airdrop_mint_fee_bps: 10000,
   //       shuffle_fee: {amount: "500000000", denom:"ustars"},
   //     },
   //   }
   // }
   
-  // const label = 'Vending Factory USDC Updatable'
+  // const label = 'Vending Factory HUAHUA'
   // let senderAddress = (await signer.getAccounts())[0].address
   // const response = await client.instantiate(
   //  senderAddress,
-  //   80,
-  //   {},
+  //   2775,
+  //   msg,
   //   label,
   //   "auto"
   // )
 
   // console.log(response)
-
+  
   // const msg = {
   //   params:{
   //     allowed_sg721_code_ids: [2661],
@@ -181,35 +182,35 @@ const main = async () => {
 
   // console.log(response)
 
-  const msg = {
-    params:{
-      allowed_sg721_code_ids: [2595],
-      code_id: 3109,
-      frozen: false,
-      creation_fee: {amount: "1000000000", denom:"ustars"},
-      min_mint_price: {amount: "0", denom:"factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/ufrienzies"},
-      mint_fee_bps: 500,
-      max_trading_offset_secs: 604800,
-      extension: {
-        max_per_address_limit: 50,
-        airdrop_mint_price: {amount: "100000", denom:"factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/ufrienzies"},
-        airdrop_mint_fee_bps: 10000,
-        dev_fee_address: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3",
-      },
-    }
-  }
+  // const msg = {
+  //   params:{
+  //     allowed_sg721_code_ids: [2595],
+  //     code_id: 3119,
+  //     frozen: false,
+  //     creation_fee: {amount: "1000000000", denom:"ustars"},
+  //     min_mint_price: {amount: "10000000", denom:"factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uBRNCH"},
+  //     mint_fee_bps: 500,
+  //     max_trading_offset_secs: 604800,
+  //     extension: {
+  //       max_per_address_limit: 50,
+  //       airdrop_mint_price: {amount: "100000", denom:"ustars"},
+  //       airdrop_mint_fee_bps: 10000,
+  //       dev_fee_address: "stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3",
+  //     },
+  //   }
+  // }
   
-  const label = 'Open Edition FRNZ Factory'
-  let senderAddress = (await signer.getAccounts())[0].address
-  const response = await client.instantiate(
-   senderAddress,
-    3108,
-    msg,
-    label,
-    "auto"
-  )
+  // const label = 'Open Edition BRNCH Factory'
+  // let senderAddress = (await signer.getAccounts())[0].address
+  // const response = await client.instantiate(
+  //  senderAddress,
+  //   3120,
+  //   msg,
+  //   label,
+  //   "auto"
+  // )
 
-  console.log(response)
+  // console.log(response)
 
   // AUTHZ
 
@@ -341,22 +342,23 @@ const main = async () => {
   
   // console.log(response)
   
-  //STAKING PROGRAM
+  //LOYALTY PROGRAM
   
   // const executeResponse = await client.execute(
-    //     "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
-    //     "stars1wcplnd8979nd88kelpr8lwwygan47n39l7aksdh7angm4rfk47wsa5f6t4",
-    //     {
-    //       update_tiers:{tiers: ["1000000000","2000000000","3000000000"]}
-    //     },
-    //     "auto",
-    //     '',      
-    //   )
-    //   console.log(executeResponse)
+  //       "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
+  //       "stars1s5uqphh4sw9qg2ejqc7s4l67tgxh4mfymswczpk4nflg7stsl3eql29arr",
+  //       {
+  //         update_tiers:{tiers: ["2000000000","3000000000","4000000000"]}
+  //       },
+  //       "auto",
+  //       '',      
+  //     )
+  //     console.log(executeResponse)
       
     // const vip_minter_init_msg = {
-    //   collection_code_id: 3059,
-    //   update_interval: 50,
+    //   collection_code_id: 3129,
+    //   tiers: ["1000","2000","3000"],
+    //   base_uri: "ipfs://test",
     // }
 
     // const vip_program_init_msg = {
@@ -366,12 +368,12 @@ const main = async () => {
 
 
   
-  // const label = 'VIP Program'
+  // const label = 'VIP Minter'
   // let senderAddress = (await signer.getAccounts())[0].address
   // const response = await client.instantiate(
   //  senderAddress,
-  //   3053,
-  //   vip_program_init_msg,
+  //   3128,
+  //   vip_minter_init_msg,
   //   label,
   //   "auto",
   //   {
@@ -384,20 +386,26 @@ const main = async () => {
   // console.log(JSON.stringify(response.logs[0].events))
 
   // const executeResponse = await client.execute(
-  //     "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz",
-  //     "stars1w0enyklvdv5ux5dnmj3wnc66v580tcvxw6r9rp6psly6z2p8udxqslw836",
+  //     "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e",
+  //     "stars1tdfjr44nu676j9h4sf9psulzvanna2eqkvp8tsrglf4azq48txrqtx2ve6",
   //     {
-  //       update:{token_id: 3}
+  //       check_delegations:{address: "stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz"}
   //     },
   //     "auto",
   //     '',      
   //   )
   //   console.log(executeResponse)
+  //   console.log(JSON.stringify(executeResponse))
 
   //stars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz
   //stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e
-    // const tier = await client.queryContractSmart("stars1wcplnd8979nd88kelpr8lwwygan47n39l7aksdh7angm4rfk47wsa5f6t4", {
-    //   tier: { address: "stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e" },
+    // const tiers = await client.queryContractSmart("stars1qcpfl6mfgfs9n9vp6gjgnllzpvtqd9sqmjcwq3v8m6m0d80njezqezkjw4", {
+    //   tiers: {},
+    // });
+    // console.log("Tiers: ", tiers)
+
+    // const tier = await client.queryContractSmart("stars1qcpfl6mfgfs9n9vp6gjgnllzpvtqd9sqmjcwq3v8m6m0d80njezqezkjw4", {
+    //   tier: { address: "stars16z43tjws3vw06ej9v7nrszu0ldsmn0eyjnjpu8" },
     // });
 
     // console.log("Tier: ", tier)
@@ -508,7 +516,7 @@ const main = async () => {
   
   // Query Balance
 
-  // const result = await client.queryContractSmart("stars1hvu2ghqkcnvhtj2fc6wuazxt4dqcftslp2rwkkkcxy269a35a9pq60ug2q", {
+  // const result = await client.queryContractSmart("stars1eluqmr6x78ehl4plrln6khxc0qrspfhc7rt3whmr59escpve0r4swcacjh", {
   //     params:{},
   // })
   // console.log(result.params)
